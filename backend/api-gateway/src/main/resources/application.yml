@@ -1,0 +1,163 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: api-gateway
+  
+  cloud:
+    gateway:
+      routes:
+        - id: auth-service
+          uri: http://localhost:8081
+          predicates:
+            - Path=/api/auth/**
+          filters:
+            - RewritePath=/api(?<segment>/?.*), ${segment}
+        
+        - id: catalog-service-public
+          uri: http://localhost:8082
+          predicates:
+            - Path=/api/products/**
+            - Method=GET
+          filters:
+            - RewritePath=/api(?<segment>/?.*), ${segment}
+        
+        - id: catalog-service-protected
+          uri: http://localhost:8082
+          predicates:
+            - Path=/api/products/**
+          filters:
+            - RewritePath=/api(?<segment>/?.*), ${segment}
+            - JwtAuthenticationFilter
+        
+        - id: order-service
+          uri: http://localhost:8083
+          predicates:
+            - Path=/api/orders/**
+          filters:
+            - RewritePath=/api(?<segment>/?.*), ${segment}
+            - JwtAuthenticationFilter
+        
+        - id: inventory-service
+          uri: http://localhost:8084
+          predicates:
+            - Path=/api/inventory/**
+          filters:
+            - RewritePath=/api(?<segment>/?.*), ${segment}
+            - JwtAuthenticationFilter
+        
+        - id: payment-service
+          uri: http://localhost:8085
+          predicates:
+            - Path=/api/payments/**
+          filters:
+            - RewritePath=/api(?<segment>/?.*), ${segment}
+            - JwtAuthenticationFilter
+        
+        - id: shipping-service
+          uri: http://localhost:8086
+          predicates:
+            - Path=/api/shipments/**
+          filters:
+            - RewritePath=/api(?<segment>/?.*), ${segment}
+            - JwtAuthenticationFilter
+        
+        - id: notification-service
+          uri: http://localhost:8087
+          predicates:
+            - Path=/api/notifications/**
+          filters:
+            - RewritePath=/api(?<segment>/?.*), ${segment}
+            - JwtAuthenticationFilter
+
+jwt:
+  secret: OMS_JWT_SECRET_KEY_MINIMUM_256_BITS_FOR_HS256_ALGORITHM_SECURITY
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,gateway
+  endpoint:
+    health:
+      show-details: always
+    gateway:
+      enabled: true
+
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG
+    com.oms: DEBUG
+
+---
+spring:
+  config:
+    activate:
+      on-profile: docker
+  
+  cloud:
+    gateway:
+      routes:
+        - id: auth-service
+          uri: http://auth-service:8081
+          predicates:
+            - Path=/api/auth/**
+          filters:
+            - RewritePath=/api(?<segment>/?.*), ${segment}
+        
+        - id: catalog-service-public
+          uri: http://catalog-service:8082
+          predicates:
+            - Path=/api/products/**
+            - Method=GET
+          filters:
+            - RewritePath=/api(?<segment>/?.*), ${segment}
+        
+        - id: catalog-service-protected
+          uri: http://catalog-service:8082
+          predicates:
+            - Path=/api/products/**
+          filters:
+            - RewritePath=/api(?<segment>/?.*), ${segment}
+            - JwtAuthenticationFilter
+        
+        - id: order-service
+          uri: http://order-service:8083
+          predicates:
+            - Path=/api/orders/**
+          filters:
+            - RewritePath=/api(?<segment>/?.*), ${segment}
+            - JwtAuthenticationFilter
+        
+        - id: inventory-service
+          uri: http://inventory-service:8084
+          predicates:
+            - Path=/api/inventory/**
+          filters:
+            - RewritePath=/api(?<segment>/?.*), ${segment}
+            - JwtAuthenticationFilter
+        
+        - id: payment-service
+          uri: http://payment-service:8085
+          predicates:
+            - Path=/api/payments/**
+          filters:
+            - RewritePath=/api(?<segment>/?.*), ${segment}
+            - JwtAuthenticationFilter
+        
+        - id: shipping-service
+          uri: http://shipping-service:8086
+          predicates:
+            - Path=/api/shipments/**
+          filters:
+            - RewritePath=/api(?<segment>/?.*), ${segment}
+            - JwtAuthenticationFilter
+        
+        - id: notification-service
+          uri: http://notification-service:8087
+          predicates:
+            - Path=/api/notifications/**
+          filters:
+            - RewritePath=/api(?<segment>/?.*), ${segment}
+            - JwtAuthenticationFilter

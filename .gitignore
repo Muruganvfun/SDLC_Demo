@@ -1,0 +1,183 @@
+# ============================================
+# Order Management System - Git Ignore
+# ============================================
+
+# ==================== IDE ====================
+# IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# Eclipse
+.project
+.classpath
+.settings/
+bin/
+
+# NetBeans
+nbproject/
+nbbuild/
+nbdist/
+
+# ==================== Java/Maven ====================
+# Compiled files
+target/
+*.class
+*.jar
+*.war
+*.ear
+
+# Maven
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+
+# Gradle (if used)
+.gradle/
+build/
+
+# ==================== Node.js/Frontend ====================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Expo
+.expo/
+dist/
+web-build/
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.orig.*
+
+# Metro bundler
+.metro-health-check*
+
+# ==================== Testing ====================
+# Coverage reports
+coverage/
+*.lcov
+.nyc_output/
+
+# JaCoCo
+jacoco.exec
+
+# Jest
+jest-results/
+
+# ==================== Build Outputs ====================
+# Build directories
+build/
+dist/
+out/
+.next/
+
+# ==================== Environment ====================
+# Environment files (may contain secrets)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env*.local
+
+# ==================== Logs ====================
+logs/
+*.log
+npm-debug.log*
+
+# ==================== OS Generated ====================
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# Linux
+*~
+.directory
+
+# ==================== Secrets & Credentials ====================
+# Never commit these!
+*.pem
+*.key
+*.crt
+*.p12
+*.jks
+secrets/
+credentials/
+.secrets
+*.secret
+
+# AWS
+.aws/
+
+# ==================== Database ====================
+*.db
+*.sqlite
+*.sqlite3
+*.h2.db
+
+# ==================== Docker ====================
+# Docker compose override (local customizations)
+docker-compose.override.yml
+docker-compose.local.yml
+
+# ==================== SonarQube ====================
+.sonar/
+.scannerwork/
+
+# ==================== Temporary Files ====================
+tmp/
+temp/
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+
+# ==================== Package Lock Files ====================
+# Uncomment if you want to ignore lock files (not recommended)
+# package-lock.json
+# yarn.lock
+
+# ==================== Project Specific ====================
+# Tools directory (JDK, Maven - large binaries)
+tools/jdk-*/
+tools/apache-maven-*/
+tools/*.zip
+
+# Local configuration overrides
+application-local.yml
+application-local.properties
+
+# Test outputs
+test-output/
+test-results/
+
+# Generated documentation
+generated-docs/
+
+# Factory AI artifacts (if any)
+.factory/artifacts/
