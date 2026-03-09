@@ -22,15 +22,22 @@ const ProductListScreen: React.FC<ProductListScreenProps> = ({ navigation }) => 
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const { logout, user } = useAuth();
   const { items, addItem, total } = useCart();
 
   const fetchProducts = async () => {
     try {
+      setError(null);
+      console.log('Fetching products...');
       const response = await api.getProducts();
-      setProducts(response.data?.content || []);
-    } catch (err) {
+      console.log('Products response:', response);
+      const productList = response.data?.content || [];
+      console.log('Setting products:', productList.length);
+      setProducts(productList);
+    } catch (err: any) {
       console.error('Failed to fetch products:', err);
+      setError(err.message || 'Failed to load products');
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -83,6 +90,18 @@ const ProductListScreen: React.FC<ProductListScreenProps> = ({ navigation }) => 
     return (
       <View style={styles.centered}>
         <ActivityIndicator size="large" color="#4F46E5" />
+        <Text style={{ marginTop: 10, color: '#666' }}>Loading products...</Text>
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={styles.centered}>
+        <Text style={{ color: '#EF4444', fontSize: 16, marginBottom: 10 }}>Error: {error}</Text>
+        <TouchableOpacity style={styles.addButton} onPress={() => { setLoading(true); fetchProducts(); }}>
+          <Text style={styles.addButtonText}>Retry</Text>
+        </TouchableOpacity>
       </View>
     );
   }

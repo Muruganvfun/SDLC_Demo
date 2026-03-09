@@ -51,24 +51,36 @@ const CreateOrderScreen: React.FC<CreateOrderScreenProps> = ({ navigation }) => 
       }));
 
       // Step 1: Create Order
-      console.log('Creating order...');
+      console.log('Creating order with items:', JSON.stringify(orderItems));
+      console.log('Shipping address:', JSON.stringify(address));
       const orderResponse = await api.createOrder(orderItems, address);
+      console.log('Order response:', JSON.stringify(orderResponse));
+      
+      if (!orderResponse.data?.id) {
+        throw new Error('Order creation failed - no order ID returned');
+      }
+      
       const orderId = orderResponse.data.id;
       setCreatedOrderId(orderId);
-      console.log('Order created:', orderId);
+      console.log('Order created successfully:', orderId);
 
       // Step 2: Process Payment
-      console.log('Processing payment with method:', selectedPayment.id);
-      await api.payOrder(orderId, selectedPayment.id);
-      console.log('Payment successful');
+      console.log('Processing payment for order:', orderId, 'with method:', selectedPayment.id);
+      const paymentResponse = await api.payOrder(orderId, selectedPayment.id);
+      console.log('Payment response:', JSON.stringify(paymentResponse));
+      console.log('Payment successful!');
 
-      // Success
-      setOrderStep('success');
+      // Success - update state
       clearCart();
+      setOrderStep('success');
+      console.log('Order flow completed successfully');
     } catch (err: any) {
       console.error('Order/Payment error:', err);
+      console.error('Error response:', err.response?.data);
+      console.error('Error status:', err.response?.status);
       setOrderStep('cart');
-      Alert.alert('Error', err.response?.data?.message || 'Failed to process order');
+      const errorMessage = err.response?.data?.message || err.message || 'Failed to process order';
+      Alert.alert('Order Error', errorMessage);
     } finally {
       setLoading(false);
     }

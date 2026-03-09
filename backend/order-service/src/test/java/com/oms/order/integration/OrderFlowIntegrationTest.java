@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.oms.order.dto.CreateOrderRequest;
 import com.oms.order.dto.PaymentRequest;
-import com.oms.order.dto.ShippingAddressDto;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -58,7 +57,7 @@ class OrderFlowIntegrationTest {
         itemRequest.setProductId(productId);
         itemRequest.setQuantity(2);
 
-        ShippingAddressDto address = new ShippingAddressDto();
+        CreateOrderRequest.ShippingAddress address = new CreateOrderRequest.ShippingAddress();
         address.setStreet("123 E2E Test Street");
         address.setCity("Test City");
         address.setState("TC");

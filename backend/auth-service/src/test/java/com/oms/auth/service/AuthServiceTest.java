@@ -135,6 +135,7 @@ class AuthServiceTest {
 
             // Then
             assertThat(response.getEmail()).isEqualTo("testuser@example.com");
+            verify(userRepository).existsByEmail("testuser@example.com");
         }
     }
 
