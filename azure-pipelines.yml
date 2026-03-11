@@ -216,53 +216,56 @@ stages:
         publishLocation: 'Container'
 
 # ==================== CODE QUALITY STAGE ====================
+# NOTE: SonarQube tasks commented out - install extension from marketplace if needed
+# https://marketplace.visualstudio.com/items?itemName=SonarSource.sonarqube
 - stage: CodeQuality
   displayName: 'Code Quality & Security'
   dependsOn: Build
   condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
   jobs:
-  - job: SonarQubeAnalysis
-    displayName: 'SonarQube Analysis'
-    pool:
-      vmImage: 'ubuntu-latest'
-    steps:
-    - task: Cache@2
-      displayName: 'Cache Maven packages'
-      inputs:
-        key: 'maven | "$(Agent.OS)" | backend/pom.xml'
-        path: $(MAVEN_CACHE_FOLDER)
-
-    - task: JavaToolInstaller@0
-      inputs:
-        versionSpec: '$(JAVA_VERSION)'
-        jdkArchitectureOption: 'x64'
-        jdkSourceOption: 'PreInstalled'
-
-    - task: SonarQubePrepare@5
-      displayName: 'Prepare SonarQube Analysis'
-      inputs:
-        SonarQube: '$(sonarQubeServiceConnection)'
-        scannerMode: 'Other'
-        extraProperties: |
-          sonar.projectKey=oms-order-management-system
-          sonar.projectName=Order Management System
-          sonar.java.binaries=backend/**/target/classes
-          sonar.coverage.jacoco.xmlReportPaths=backend/**/target/site/jacoco/jacoco.xml
-      continueOnError: true
-
-    - task: Maven@4
-      displayName: 'Build & Analyze'
-      inputs:
-        mavenPomFile: 'backend/pom.xml'
-        goals: 'clean verify sonar:sonar'
-        options: '-B $(MAVEN_OPTS)'
-      continueOnError: true
-
-    - task: SonarQubePublish@5
-      displayName: 'Publish Quality Gate Result'
-      inputs:
-        pollingTimeoutSec: '300'
-      continueOnError: true
+  # Uncomment below when SonarQube extension is installed
+  # - job: SonarQubeAnalysis
+  #   displayName: 'SonarQube Analysis'
+  #   pool:
+  #     vmImage: 'ubuntu-latest'
+  #   steps:
+  #   - task: Cache@2
+  #     displayName: 'Cache Maven packages'
+  #     inputs:
+  #       key: 'maven | "$(Agent.OS)" | backend/pom.xml'
+  #       path: $(MAVEN_CACHE_FOLDER)
+  #
+  #   - task: JavaToolInstaller@0
+  #     inputs:
+  #       versionSpec: '$(JAVA_VERSION)'
+  #       jdkArchitectureOption: 'x64'
+  #       jdkSourceOption: 'PreInstalled'
+  #
+  #   - task: SonarQubePrepare@5
+  #     displayName: 'Prepare SonarQube Analysis'
+  #     inputs:
+  #       SonarQube: '$(sonarQubeServiceConnection)'
+  #       scannerMode: 'Other'
+  #       extraProperties: |
+  #         sonar.projectKey=oms-order-management-system
+  #         sonar.projectName=Order Management System
+  #         sonar.java.binaries=backend/**/target/classes
+  #         sonar.coverage.jacoco.xmlReportPaths=backend/**/target/site/jacoco/jacoco.xml
+  #     continueOnError: true
+  #
+  #   - task: Maven@4
+  #     displayName: 'Build & Analyze'
+  #     inputs:
+  #       mavenPomFile: 'backend/pom.xml'
+  #       goals: 'clean verify sonar:sonar'
+  #       options: '-B $(MAVEN_OPTS)'
+  #     continueOnError: true
+  #
+  #   - task: SonarQubePublish@5
+  #     displayName: 'Publish Quality Gate Result'
+  #     inputs:
+  #       pollingTimeoutSec: '300'
+  #     continueOnError: true
 
   - job: SecurityScan
     displayName: 'Security Scanning'
