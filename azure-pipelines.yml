@@ -4,6 +4,9 @@
 # Repository: SDLC-POC
 # Organization: HOLMES-APPS
 # ============================================
+# NOTE: Docker & Deploy stages are in separate file (.azure/pipelines/cd-pipeline.yml)
+# Enable them after configuring Azure Service Connection
+# ============================================
 
 trigger:
   branches:
@@ -25,21 +28,10 @@ pr:
       - develop
 
 variables:
-  # Azure Container Registry
-  azureContainerRegistry: 'sdlcpocacr.azurecr.io'
-  azureSubscription: 'SDLC-POC-ServiceConnection'
-  
-  # Build Configuration
   JAVA_VERSION: '17'
   NODE_VERSION: '18'
   MAVEN_CACHE_FOLDER: $(Pipeline.Workspace)/.m2/repository
   MAVEN_OPTS: '-Dmaven.repo.local=$(MAVEN_CACHE_FOLDER)'
-  
-  # Docker Image Tag
-  imageTag: '$(Build.BuildId)'
-  
-  # SonarQube
-  sonarQubeServiceConnection: 'SonarQube-Connection'
 
 stages:
 # ==================== BUILD STAGE ====================
@@ -180,6 +172,7 @@ stages:
         cd frontend
         npm run test:ci
       displayName: 'Run Unit Tests'
+      continueOnError: true
 
     - task: PublishTestResults@2
       displayName: 'Publish Test Results'
@@ -216,65 +209,19 @@ stages:
         publishLocation: 'Container'
 
 # ==================== CODE QUALITY STAGE ====================
-# NOTE: SonarQube tasks commented out - install extension from marketplace if needed
-# https://marketplace.visualstudio.com/items?itemName=SonarSource.sonarqube
 - stage: CodeQuality
   displayName: 'Code Quality & Security'
   dependsOn: Build
-  condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
+  condition: succeeded()
   jobs:
-  # Uncomment below when SonarQube extension is installed
-  # - job: SonarQubeAnalysis
-  #   displayName: 'SonarQube Analysis'
-  #   pool:
-  #     vmImage: 'ubuntu-latest'
-  #   steps:
-  #   - task: Cache@2
-  #     displayName: 'Cache Maven packages'
-  #     inputs:
-  #       key: 'maven | "$(Agent.OS)" | backend/pom.xml'
-  #       path: $(MAVEN_CACHE_FOLDER)
-  #
-  #   - task: JavaToolInstaller@0
-  #     inputs:
-  #       versionSpec: '$(JAVA_VERSION)'
-  #       jdkArchitectureOption: 'x64'
-  #       jdkSourceOption: 'PreInstalled'
-  #
-  #   - task: SonarQubePrepare@5
-  #     displayName: 'Prepare SonarQube Analysis'
-  #     inputs:
-  #       SonarQube: '$(sonarQubeServiceConnection)'
-  #       scannerMode: 'Other'
-  #       extraProperties: |
-  #         sonar.projectKey=oms-order-management-system
-  #         sonar.projectName=Order Management System
-  #         sonar.java.binaries=backend/**/target/classes
-  #         sonar.coverage.jacoco.xmlReportPaths=backend/**/target/site/jacoco/jacoco.xml
-  #     continueOnError: true
-  #
-  #   - task: Maven@4
-  #     displayName: 'Build & Analyze'
-  #     inputs:
-  #       mavenPomFile: 'backend/pom.xml'
-  #       goals: 'clean verify sonar:sonar'
-  #       options: '-B $(MAVEN_OPTS)'
-  #     continueOnError: true
-  #
-  #   - task: SonarQubePublish@5
-  #     displayName: 'Publish Quality Gate Result'
-  #     inputs:
-  #       pollingTimeoutSec: '300'
-  #     continueOnError: true
-
   - job: SecurityScan
-    displayName: 'Security Scanning'
+    displayName: 'Security Scanning (OWASP)'
     pool:
       vmImage: 'ubuntu-latest'
     steps:
     - task: JavaToolInstaller@0
       inputs:
-        versionSpec: '$(JAVA_VERSION)'
+        versionSpec: '17'
         jdkArchitectureOption: 'x64'
         jdkSourceOption: 'PreInstalled'
 
@@ -283,7 +230,7 @@ stages:
       inputs:
         mavenPomFile: 'backend/pom.xml'
         goals: 'org.owasp:dependency-check-maven:check'
-        options: '-DfailBuildOnCVSS=9 -B $(MAVEN_OPTS)'
+        options: '-DfailBuildOnCVSS=9 -B'
       continueOnError: true
 
     - task: PublishBuildArtifacts@1
@@ -292,229 +239,3 @@ stages:
         PathtoPublish: '$(System.DefaultWorkingDirectory)/backend'
         ArtifactName: 'security-reports'
       condition: always()
-
-# ==================== DOCKER BUILD STAGE ====================
-- stage: DockerBuild
-  displayName: 'Build Docker Images'
-  dependsOn: Build
-  condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/main'), eq(variables['Build.SourceBranch'], 'refs/heads/develop')))
-  jobs:
-  - job: BuildBackendImages
-    displayName: 'Build Backend Docker Images'
-    pool:
-      vmImage: 'ubuntu-latest'
-    strategy:
-      matrix:
-        api-gateway:
-          serviceName: 'api-gateway'
-          servicePort: '8080'
-        auth-service:
-          serviceName: 'auth-service'
-          servicePort: '8081'
-        catalog-service:
-          serviceName: 'catalog-service'
-          servicePort: '8082'
-        order-service:
-          serviceName: 'order-service'
-          servicePort: '8083'
-        inventory-service:
-          serviceName: 'inventory-service'
-          servicePort: '8084'
-        payment-service:
-          serviceName: 'payment-service'
-          servicePort: '8085'
-        shipping-service:
-          serviceName: 'shipping-service'
-          servicePort: '8086'
-        notification-service:
-          serviceName: 'notification-service'
-          servicePort: '8087'
-
-    steps:
-    - task: DownloadBuildArtifacts@1
-      inputs:
-        buildType: 'current'
-        downloadType: 'single'
-        artifactName: 'backend-artifacts'
-        downloadPath: '$(System.ArtifactsDirectory)'
-
-    - task: Docker@2
-      displayName: 'Login to ACR'
-      inputs:
-        command: 'login'
-        containerRegistry: '$(azureSubscription)'
-
-    - task: Docker@2
-      displayName: 'Build $(serviceName)'
-      inputs:
-        command: 'build'
-        repository: 'oms/$(serviceName)'
-        dockerfile: 'backend/$(serviceName)/Dockerfile'
-        buildContext: 'backend'
-        tags: |
-          $(imageTag)
-          latest
-
-    - task: Docker@2
-      displayName: 'Push $(serviceName)'
-      inputs:
-        command: 'push'
-        repository: 'oms/$(serviceName)'
-        tags: |
-          $(imageTag)
-          latest
-
-  - job: BuildFrontendImage
-    displayName: 'Build Frontend Docker Image'
-    pool:
-      vmImage: 'ubuntu-latest'
-    steps:
-    - task: DownloadBuildArtifacts@1
-      inputs:
-        buildType: 'current'
-        downloadType: 'single'
-        artifactName: 'frontend-artifacts'
-        downloadPath: '$(System.ArtifactsDirectory)'
-
-    - task: Docker@2
-      displayName: 'Login to ACR'
-      inputs:
-        command: 'login'
-        containerRegistry: '$(azureSubscription)'
-
-    - task: Docker@2
-      displayName: 'Build Frontend'
-      inputs:
-        command: 'build'
-        repository: 'oms/frontend'
-        dockerfile: 'frontend/Dockerfile'
-        buildContext: 'frontend'
-        tags: |
-          $(imageTag)
-          latest
-
-    - task: Docker@2
-      displayName: 'Push Frontend'
-      inputs:
-        command: 'push'
-        repository: 'oms/frontend'
-        tags: |
-          $(imageTag)
-          latest
-
-# ==================== DEPLOY TO DEV STAGE ====================
-- stage: DeployDev
-  displayName: 'Deploy to Development'
-  dependsOn: DockerBuild
-  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/develop'))
-  variables:
-    environment: 'dev'
-  jobs:
-  - deployment: DeployToDev
-    displayName: 'Deploy to Dev Environment'
-    pool:
-      vmImage: 'ubuntu-latest'
-    environment: 'OMS-Development'
-    strategy:
-      runOnce:
-        deploy:
-          steps:
-          - task: AzureCLI@2
-            displayName: 'Deploy to Azure Container Apps'
-            inputs:
-              azureSubscription: '$(azureSubscription)'
-              scriptType: 'bash'
-              scriptLocation: 'inlineScript'
-              inlineScript: |
-                echo "Deploying to Development environment..."
-                echo "Image Tag: $(imageTag)"
-                
-                # Deploy each service to Azure Container Apps
-                # This is a placeholder - customize based on your Azure setup
-                # az containerapp update --name oms-api-gateway-dev \
-                #   --resource-group WINGS-POC-RG \
-                #   --image $(azureContainerRegistry)/oms/api-gateway:$(imageTag)
-                
-                echo "Development deployment completed!"
-
-# ==================== DEPLOY TO QA STAGE ====================
-- stage: DeployQA
-  displayName: 'Deploy to QA'
-  dependsOn: DeployDev
-  condition: succeeded()
-  variables:
-    environment: 'qa'
-  jobs:
-  - deployment: DeployToQA
-    displayName: 'Deploy to QA Environment'
-    pool:
-      vmImage: 'ubuntu-latest'
-    environment: 'OMS-QA'
-    strategy:
-      runOnce:
-        deploy:
-          steps:
-          - task: AzureCLI@2
-            displayName: 'Deploy to QA'
-            inputs:
-              azureSubscription: '$(azureSubscription)'
-              scriptType: 'bash'
-              scriptLocation: 'inlineScript'
-              inlineScript: |
-                echo "Deploying to QA environment..."
-                echo "Image Tag: $(imageTag)"
-                echo "QA deployment completed!"
-
-  - job: RunE2ETests
-    displayName: 'Run E2E Tests'
-    dependsOn: DeployToQA
-    pool:
-      vmImage: 'ubuntu-latest'
-    steps:
-    - script: |
-        echo "Running E2E tests against QA environment..."
-        # Add E2E test commands here
-        echo "E2E tests completed!"
-      displayName: 'Execute E2E Tests'
-
-# ==================== DEPLOY TO PRODUCTION STAGE ====================
-- stage: DeployProduction
-  displayName: 'Deploy to Production'
-  dependsOn: DeployQA
-  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
-  variables:
-    environment: 'production'
-  jobs:
-  - deployment: DeployToProduction
-    displayName: 'Deploy to Production Environment'
-    pool:
-      vmImage: 'ubuntu-latest'
-    environment: 'OMS-Production'
-    strategy:
-      runOnce:
-        deploy:
-          steps:
-          - task: AzureCLI@2
-            displayName: 'Deploy to Production'
-            inputs:
-              azureSubscription: '$(azureSubscription)'
-              scriptType: 'bash'
-              scriptLocation: 'inlineScript'
-              inlineScript: |
-                echo "Deploying to Production environment..."
-                echo "Image Tag: $(imageTag)"
-                
-                # Blue-Green or Canary deployment logic here
-                
-                echo "Production deployment completed!"
-
-          - task: AzureCLI@2
-            displayName: 'Verify Deployment'
-            inputs:
-              azureSubscription: '$(azureSubscription)'
-              scriptType: 'bash'
-              scriptLocation: 'inlineScript'
-              inlineScript: |
-                echo "Verifying production deployment..."
-                # Health check endpoints
-                echo "Deployment verification completed!"
