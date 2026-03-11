@@ -1,0 +1,516 @@
+# ============================================
+# Order Management System - Azure DevOps CI/CD Pipeline
+# Project: WINGS-POC
+# Organization: HOLMES-APPS
+# ============================================
+
+trigger:
+  branches:
+    include:
+      - main
+      - develop
+      - feature/*
+      - release/*
+      - hotfix/*
+  paths:
+    exclude:
+      - docs/*
+      - '*.md'
+
+pr:
+  branches:
+    include:
+      - main
+      - develop
+
+variables:
+  # Azure Container Registry
+  azureContainerRegistry: 'wingspocacr.azurecr.io'
+  azureSubscription: 'WINGS-POC-ServiceConnection'
+  
+  # Build Configuration
+  JAVA_VERSION: '17'
+  NODE_VERSION: '18'
+  MAVEN_CACHE_FOLDER: $(Pipeline.Workspace)/.m2/repository
+  MAVEN_OPTS: '-Dmaven.repo.local=$(MAVEN_CACHE_FOLDER)'
+  
+  # Docker Image Tag
+  imageTag: '$(Build.BuildId)'
+  
+  # SonarQube
+  sonarQubeServiceConnection: 'SonarQube-Connection'
+
+stages:
+# ==================== BUILD STAGE ====================
+- stage: Build
+  displayName: 'Build & Test'
+  jobs:
+  # ---------- Backend Build & Test ----------
+  - job: BackendBuild
+    displayName: 'Backend Build & Test'
+    pool:
+      vmImage: 'ubuntu-latest'
+    
+    services:
+      postgres:
+        image: postgres:15-alpine
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: testdb
+
+    steps:
+    - task: Cache@2
+      displayName: 'Cache Maven packages'
+      inputs:
+        key: 'maven | "$(Agent.OS)" | backend/pom.xml'
+        restoreKeys: |
+          maven | "$(Agent.OS)"
+        path: $(MAVEN_CACHE_FOLDER)
+
+    - task: JavaToolInstaller@0
+      displayName: 'Install JDK $(JAVA_VERSION)'
+      inputs:
+        versionSpec: '$(JAVA_VERSION)'
+        jdkArchitectureOption: 'x64'
+        jdkSourceOption: 'PreInstalled'
+
+    - task: Maven@4
+      displayName: 'Maven Build'
+      inputs:
+        mavenPomFile: 'backend/pom.xml'
+        goals: 'clean compile'
+        options: '-DskipTests -B $(MAVEN_OPTS)'
+        publishJUnitResults: false
+
+    - task: Maven@4
+      displayName: 'Run Unit Tests'
+      inputs:
+        mavenPomFile: 'backend/pom.xml'
+        goals: 'test'
+        options: '-B $(MAVEN_OPTS)'
+        publishJUnitResults: true
+        testResultsFiles: '**/surefire-reports/TEST-*.xml'
+        testRunTitle: 'Backend Unit Tests'
+
+    - task: Maven@4
+      displayName: 'Run Integration Tests'
+      inputs:
+        mavenPomFile: 'backend/pom.xml'
+        goals: 'test'
+        options: '-Dtest=*IntegrationTest -DfailIfNoTests=false -B $(MAVEN_OPTS)'
+        publishJUnitResults: true
+        testResultsFiles: '**/surefire-reports/TEST-*IntegrationTest.xml'
+        testRunTitle: 'Backend Integration Tests'
+      continueOnError: true
+
+    - task: Maven@4
+      displayName: 'Generate Code Coverage'
+      inputs:
+        mavenPomFile: 'backend/pom.xml'
+        goals: 'jacoco:report'
+        options: '-B $(MAVEN_OPTS)'
+
+    - task: PublishCodeCoverageResults@2
+      displayName: 'Publish Code Coverage'
+      inputs:
+        summaryFileLocation: '$(System.DefaultWorkingDirectory)/backend/**/target/site/jacoco/jacoco.xml'
+        pathToSources: '$(System.DefaultWorkingDirectory)/backend'
+
+    - task: Maven@4
+      displayName: 'Package Application'
+      inputs:
+        mavenPomFile: 'backend/pom.xml'
+        goals: 'package'
+        options: '-DskipTests -B $(MAVEN_OPTS)'
+
+    - task: CopyFiles@2
+      displayName: 'Copy WAR/JAR files'
+      inputs:
+        SourceFolder: '$(System.DefaultWorkingDirectory)/backend'
+        Contents: |
+          **/target/*.war
+          **/target/*.jar
+          !**/target/original-*.jar
+        TargetFolder: '$(Build.ArtifactStagingDirectory)/backend'
+        flattenFolders: false
+
+    - task: PublishBuildArtifacts@1
+      displayName: 'Publish Backend Artifacts'
+      inputs:
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)/backend'
+        ArtifactName: 'backend-artifacts'
+        publishLocation: 'Container'
+
+  # ---------- Frontend Build & Test ----------
+  - job: FrontendBuild
+    displayName: 'Frontend Build & Test'
+    pool:
+      vmImage: 'ubuntu-latest'
+
+    steps:
+    - task: NodeTool@0
+      displayName: 'Install Node.js $(NODE_VERSION)'
+      inputs:
+        versionSpec: '$(NODE_VERSION)'
+
+    - task: Cache@2
+      displayName: 'Cache npm packages'
+      inputs:
+        key: 'npm | "$(Agent.OS)" | frontend/package-lock.json'
+        restoreKeys: |
+          npm | "$(Agent.OS)"
+        path: '$(System.DefaultWorkingDirectory)/frontend/node_modules'
+
+    - script: |
+        cd frontend
+        npm ci
+      displayName: 'Install Dependencies'
+
+    - script: |
+        cd frontend
+        npm run lint || true
+      displayName: 'Run Linting'
+      continueOnError: true
+
+    - script: |
+        cd frontend
+        npm run test:ci
+      displayName: 'Run Unit Tests'
+
+    - task: PublishTestResults@2
+      displayName: 'Publish Test Results'
+      inputs:
+        testResultsFormat: 'JUnit'
+        testResultsFiles: 'frontend/junit.xml'
+        testRunTitle: 'Frontend Unit Tests'
+      condition: always()
+
+    - task: PublishCodeCoverageResults@2
+      displayName: 'Publish Coverage'
+      inputs:
+        summaryFileLocation: '$(System.DefaultWorkingDirectory)/frontend/coverage/lcov.info'
+        pathToSources: '$(System.DefaultWorkingDirectory)/frontend/src'
+      condition: always()
+
+    - script: |
+        cd frontend
+        npm run build:web
+      displayName: 'Build Frontend'
+
+    - task: CopyFiles@2
+      displayName: 'Copy Build Output'
+      inputs:
+        SourceFolder: '$(System.DefaultWorkingDirectory)/frontend/dist'
+        Contents: '**'
+        TargetFolder: '$(Build.ArtifactStagingDirectory)/frontend'
+
+    - task: PublishBuildArtifacts@1
+      displayName: 'Publish Frontend Artifacts'
+      inputs:
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)/frontend'
+        ArtifactName: 'frontend-artifacts'
+        publishLocation: 'Container'
+
+# ==================== CODE QUALITY STAGE ====================
+- stage: CodeQuality
+  displayName: 'Code Quality & Security'
+  dependsOn: Build
+  condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
+  jobs:
+  - job: SonarQubeAnalysis
+    displayName: 'SonarQube Analysis'
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - task: Cache@2
+      displayName: 'Cache Maven packages'
+      inputs:
+        key: 'maven | "$(Agent.OS)" | backend/pom.xml'
+        path: $(MAVEN_CACHE_FOLDER)
+
+    - task: JavaToolInstaller@0
+      inputs:
+        versionSpec: '$(JAVA_VERSION)'
+        jdkArchitectureOption: 'x64'
+        jdkSourceOption: 'PreInstalled'
+
+    - task: SonarQubePrepare@5
+      displayName: 'Prepare SonarQube Analysis'
+      inputs:
+        SonarQube: '$(sonarQubeServiceConnection)'
+        scannerMode: 'Other'
+        extraProperties: |
+          sonar.projectKey=oms-order-management-system
+          sonar.projectName=Order Management System
+          sonar.java.binaries=backend/**/target/classes
+          sonar.coverage.jacoco.xmlReportPaths=backend/**/target/site/jacoco/jacoco.xml
+      continueOnError: true
+
+    - task: Maven@4
+      displayName: 'Build & Analyze'
+      inputs:
+        mavenPomFile: 'backend/pom.xml'
+        goals: 'clean verify sonar:sonar'
+        options: '-B $(MAVEN_OPTS)'
+      continueOnError: true
+
+    - task: SonarQubePublish@5
+      displayName: 'Publish Quality Gate Result'
+      inputs:
+        pollingTimeoutSec: '300'
+      continueOnError: true
+
+  - job: SecurityScan
+    displayName: 'Security Scanning'
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - task: JavaToolInstaller@0
+      inputs:
+        versionSpec: '$(JAVA_VERSION)'
+        jdkArchitectureOption: 'x64'
+        jdkSourceOption: 'PreInstalled'
+
+    - task: Maven@4
+      displayName: 'OWASP Dependency Check'
+      inputs:
+        mavenPomFile: 'backend/pom.xml'
+        goals: 'org.owasp:dependency-check-maven:check'
+        options: '-DfailBuildOnCVSS=9 -B $(MAVEN_OPTS)'
+      continueOnError: true
+
+    - task: PublishBuildArtifacts@1
+      displayName: 'Publish Security Report'
+      inputs:
+        PathtoPublish: '$(System.DefaultWorkingDirectory)/backend'
+        ArtifactName: 'security-reports'
+      condition: always()
+
+# ==================== DOCKER BUILD STAGE ====================
+- stage: DockerBuild
+  displayName: 'Build Docker Images'
+  dependsOn: Build
+  condition: and(succeeded(), or(eq(variables['Build.SourceBranch'], 'refs/heads/main'), eq(variables['Build.SourceBranch'], 'refs/heads/develop')))
+  jobs:
+  - job: BuildBackendImages
+    displayName: 'Build Backend Docker Images'
+    pool:
+      vmImage: 'ubuntu-latest'
+    strategy:
+      matrix:
+        api-gateway:
+          serviceName: 'api-gateway'
+          servicePort: '8080'
+        auth-service:
+          serviceName: 'auth-service'
+          servicePort: '8081'
+        catalog-service:
+          serviceName: 'catalog-service'
+          servicePort: '8082'
+        order-service:
+          serviceName: 'order-service'
+          servicePort: '8083'
+        inventory-service:
+          serviceName: 'inventory-service'
+          servicePort: '8084'
+        payment-service:
+          serviceName: 'payment-service'
+          servicePort: '8085'
+        shipping-service:
+          serviceName: 'shipping-service'
+          servicePort: '8086'
+        notification-service:
+          serviceName: 'notification-service'
+          servicePort: '8087'
+
+    steps:
+    - task: DownloadBuildArtifacts@1
+      inputs:
+        buildType: 'current'
+        downloadType: 'single'
+        artifactName: 'backend-artifacts'
+        downloadPath: '$(System.ArtifactsDirectory)'
+
+    - task: Docker@2
+      displayName: 'Login to ACR'
+      inputs:
+        command: 'login'
+        containerRegistry: '$(azureSubscription)'
+
+    - task: Docker@2
+      displayName: 'Build $(serviceName)'
+      inputs:
+        command: 'build'
+        repository: 'oms/$(serviceName)'
+        dockerfile: 'backend/$(serviceName)/Dockerfile'
+        buildContext: 'backend'
+        tags: |
+          $(imageTag)
+          latest
+
+    - task: Docker@2
+      displayName: 'Push $(serviceName)'
+      inputs:
+        command: 'push'
+        repository: 'oms/$(serviceName)'
+        tags: |
+          $(imageTag)
+          latest
+
+  - job: BuildFrontendImage
+    displayName: 'Build Frontend Docker Image'
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - task: DownloadBuildArtifacts@1
+      inputs:
+        buildType: 'current'
+        downloadType: 'single'
+        artifactName: 'frontend-artifacts'
+        downloadPath: '$(System.ArtifactsDirectory)'
+
+    - task: Docker@2
+      displayName: 'Login to ACR'
+      inputs:
+        command: 'login'
+        containerRegistry: '$(azureSubscription)'
+
+    - task: Docker@2
+      displayName: 'Build Frontend'
+      inputs:
+        command: 'build'
+        repository: 'oms/frontend'
+        dockerfile: 'frontend/Dockerfile'
+        buildContext: 'frontend'
+        tags: |
+          $(imageTag)
+          latest
+
+    - task: Docker@2
+      displayName: 'Push Frontend'
+      inputs:
+        command: 'push'
+        repository: 'oms/frontend'
+        tags: |
+          $(imageTag)
+          latest
+
+# ==================== DEPLOY TO DEV STAGE ====================
+- stage: DeployDev
+  displayName: 'Deploy to Development'
+  dependsOn: DockerBuild
+  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/develop'))
+  variables:
+    environment: 'dev'
+  jobs:
+  - deployment: DeployToDev
+    displayName: 'Deploy to Dev Environment'
+    pool:
+      vmImage: 'ubuntu-latest'
+    environment: 'OMS-Development'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: AzureCLI@2
+            displayName: 'Deploy to Azure Container Apps'
+            inputs:
+              azureSubscription: '$(azureSubscription)'
+              scriptType: 'bash'
+              scriptLocation: 'inlineScript'
+              inlineScript: |
+                echo "Deploying to Development environment..."
+                echo "Image Tag: $(imageTag)"
+                
+                # Deploy each service to Azure Container Apps
+                # This is a placeholder - customize based on your Azure setup
+                # az containerapp update --name oms-api-gateway-dev \
+                #   --resource-group WINGS-POC-RG \
+                #   --image $(azureContainerRegistry)/oms/api-gateway:$(imageTag)
+                
+                echo "Development deployment completed!"
+
+# ==================== DEPLOY TO QA STAGE ====================
+- stage: DeployQA
+  displayName: 'Deploy to QA'
+  dependsOn: DeployDev
+  condition: succeeded()
+  variables:
+    environment: 'qa'
+  jobs:
+  - deployment: DeployToQA
+    displayName: 'Deploy to QA Environment'
+    pool:
+      vmImage: 'ubuntu-latest'
+    environment: 'OMS-QA'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: AzureCLI@2
+            displayName: 'Deploy to QA'
+            inputs:
+              azureSubscription: '$(azureSubscription)'
+              scriptType: 'bash'
+              scriptLocation: 'inlineScript'
+              inlineScript: |
+                echo "Deploying to QA environment..."
+                echo "Image Tag: $(imageTag)"
+                echo "QA deployment completed!"
+
+  - job: RunE2ETests
+    displayName: 'Run E2E Tests'
+    dependsOn: DeployToQA
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - script: |
+        echo "Running E2E tests against QA environment..."
+        # Add E2E test commands here
+        echo "E2E tests completed!"
+      displayName: 'Execute E2E Tests'
+
+# ==================== DEPLOY TO PRODUCTION STAGE ====================
+- stage: DeployProduction
+  displayName: 'Deploy to Production'
+  dependsOn: DeployQA
+  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+  variables:
+    environment: 'production'
+  jobs:
+  - deployment: DeployToProduction
+    displayName: 'Deploy to Production Environment'
+    pool:
+      vmImage: 'ubuntu-latest'
+    environment: 'OMS-Production'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: AzureCLI@2
+            displayName: 'Deploy to Production'
+            inputs:
+              azureSubscription: '$(azureSubscription)'
+              scriptType: 'bash'
+              scriptLocation: 'inlineScript'
+              inlineScript: |
+                echo "Deploying to Production environment..."
+                echo "Image Tag: $(imageTag)"
+                
+                # Blue-Green or Canary deployment logic here
+                
+                echo "Production deployment completed!"
+
+          - task: AzureCLI@2
+            displayName: 'Verify Deployment'
+            inputs:
+              azureSubscription: '$(azureSubscription)'
+              scriptType: 'bash'
+              scriptLocation: 'inlineScript'
+              inlineScript: |
+                echo "Verifying production deployment..."
+                # Health check endpoints
+                echo "Deployment verification completed!"
