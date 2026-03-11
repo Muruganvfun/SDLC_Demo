@@ -1,6 +1,7 @@
 # ============================================
 # Order Management System - Azure DevOps CI/CD Pipeline
 # Project: WINGS-POC
+# Repository: SDLC-POC
 # Organization: HOLMES-APPS
 # ============================================
 
@@ -25,8 +26,8 @@ pr:
 
 variables:
   # Azure Container Registry
-  azureContainerRegistry: 'wingspocacr.azurecr.io'
-  azureSubscription: 'WINGS-POC-ServiceConnection'
+  azureContainerRegistry: 'sdlcpocacr.azurecr.io'
+  azureSubscription: 'SDLC-POC-ServiceConnection'
   
   # Build Configuration
   JAVA_VERSION: '17'
