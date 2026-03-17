@@ -72,7 +72,7 @@ spring:
             - JwtAuthenticationFilter
 
 jwt:
-  secret: OMS_JWT_SECRET_KEY_MINIMUM_256_BITS_FOR_HS256_ALGORITHM_SECURITY
+  secret: ${JWT_SECRET:OMS_DEV_SECRET_KEY_MINIMUM_256_BITS_CHANGE_IN_PRODUCTION}
 
 management:
   endpoints:

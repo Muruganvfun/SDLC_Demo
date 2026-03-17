@@ -10,7 +10,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.*;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.web.client.DefaultResponseErrorHandler;
+import org.springframework.web.client.RestTemplate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -24,18 +27,24 @@ class AuthControllerIntegrationTest {
     private int port;
 
     @Autowired
-    private TestRestTemplate restTemplate;
-
-    @Autowired
     private ObjectMapper objectMapper;
 
     private String baseUrl;
+    private RestTemplate restTemplate;
     private static String authToken;
     private static String userId;
 
     @BeforeEach
     void setUp() {
         baseUrl = "http://localhost:" + port;
+        HttpComponentsClientHttpRequestFactory factory = new HttpComponentsClientHttpRequestFactory();
+        restTemplate = new RestTemplate(factory);
+        restTemplate.setErrorHandler(new DefaultResponseErrorHandler() {
+            @Override
+            public boolean hasError(HttpStatusCode statusCode) {
+                return false;
+            }
+        });
     }
 
     @Test

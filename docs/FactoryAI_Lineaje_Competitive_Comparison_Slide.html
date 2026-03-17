@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FactoryAI + Lineaje - Competitive Comparison</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #fff;
+        }
+        .slide {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: linear-gradient(145deg, #1e2a4a 0%, #0f1629 100%);
+            border-radius: 16px;
+            padding: 35px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #4a90d9;
+            padding-bottom: 15px;
+        }
+        .header h1 {
+            font-size: 2rem;
+            background: linear-gradient(90deg, #4a90d9, #67b26f);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 6px;
+        }
+        .header .subtitle {
+            color: #8892b0;
+            font-size: 1rem;
+        }
+        
+        .category-label {
+            background: linear-gradient(90deg, #4a90d9, #357abd);
+            color: white;
+            padding: 6px 15px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+        .category-label.agentic {
+            background: linear-gradient(90deg, #9b59b6, #8e44ad);
+        }
+        
+        .comparison-section {
+            margin-bottom: 20px;
+        }
+        
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: 180px repeat(4, 1fr);
+            gap: 2px;
+            margin-bottom: 15px;
+        }
+        .comparison-grid.agentic {
+            grid-template-columns: 180px repeat(4, 1fr);
+        }
+        .grid-header {
+            background: linear-gradient(135deg, #4a90d9 0%, #357abd 100%);
+            padding: 10px 6px;
+            font-weight: bold;
+            text-align: center;
+            font-size: 0.75rem;
+        }
+        .grid-header.factory {
+            background: linear-gradient(135deg, #67b26f 0%, #4ca2cd 100%);
+        }
+        .grid-header.agentic-header {
+            background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
+        }
+        .grid-cell {
+            background: rgba(255,255,255,0.05);
+            padding: 8px 6px;
+            text-align: center;
+            font-size: 0.72rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .grid-cell.feature-name {
+            background: rgba(74,144,217,0.2);
+            font-weight: 600;
+            text-align: left;
+            justify-content: flex-start;
+            padding-left: 10px;
+            font-size: 0.7rem;
+        }
+        .check { color: #67b26f; font-weight: bold; }
+        .partial { color: #f0ad4e; }
+        .none { color: #666; }
+        .superior { color: #67b26f; font-weight: bold; font-size: 0.9rem; }
+        
+        .two-tables {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        .usp-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .usp-box {
+            background: rgba(255,255,255,0.03);
+            border-radius: 10px;
+            padding: 15px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .usp-box h3 {
+            font-size: 0.95rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .usp-box.factory h3 { color: #67b26f; }
+        .usp-box.lineaje h3 { color: #f7941d; }
+        .usp-list {
+            list-style: none;
+        }
+        .usp-list li {
+            padding: 4px 0;
+            font-size: 0.75rem;
+            color: #b8c5d6;
+            display: flex;
+            align-items: flex-start;
+            gap: 6px;
+        }
+        .usp-list li::before {
+            content: "✓";
+            color: inherit;
+            font-weight: bold;
+        }
+        .usp-box.factory .usp-list li::before { color: #67b26f; }
+        .usp-box.lineaje .usp-list li::before { color: #f7941d; }
+        
+        .combined-value {
+            background: linear-gradient(135deg, rgba(103,178,111,0.15) 0%, rgba(247,148,29,0.15) 100%);
+            border: 1px solid rgba(103,178,111,0.3);
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+            text-align: center;
+        }
+        .combined-value h3 {
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+            background: linear-gradient(90deg, #67b26f, #f7941d);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .combined-value p {
+            color: #b8c5d6;
+            font-size: 0.85rem;
+            line-height: 1.4;
+        }
+        .logo-row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            margin-top: 12px;
+        }
+        .logo-badge {
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.8rem;
+        }
+        .logo-badge.factory { background: rgba(103,178,111,0.2); color: #67b26f; }
+        .logo-badge.lineaje { background: rgba(247,148,29,0.2); color: #f7941d; }
+        
+        .section-title {
+            color: #8892b0;
+            font-size: 0.85rem;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="slide">
+        <div class="header">
+            <h1>FactoryAI + Lineaje: Competitive Advantage</h1>
+            <div class="subtitle">Autonomous Development + Software Supply Chain Security vs. Code Assistants & Agentic Tools</div>
+        </div>
+
+        <div class="two-tables">
+            <!-- Code Assistants Comparison -->
+            <div class="comparison-section">
+                <span class="category-label">CODE ASSISTANTS</span>
+                <div class="comparison-grid">
+                    <div class="grid-header">Capability</div>
+                    <div class="grid-header factory">FactoryAI + Lineaje</div>
+                    <div class="grid-header">GitHub Copilot</div>
+                    <div class="grid-header">Claude Code</div>
+                    <div class="grid-header">Cursor</div>
+
+                    <div class="grid-cell feature-name">Code Completion</div>
+                    <div class="grid-cell"><span class="check">✓</span></div>
+                    <div class="grid-cell"><span class="check">✓</span></div>
+                    <div class="grid-cell"><span class="check">✓</span></div>
+                    <div class="grid-cell"><span class="check">✓</span></div>
+
+                    <div class="grid-cell feature-name">Multi-File Editing</div>
+                    <div class="grid-cell"><span class="superior">✓✓</span></div>
+                    <div class="grid-cell"><span class="partial">Limited</span></div>
+                    <div class="grid-cell"><span class="check">✓</span></div>
+                    <div class="grid-cell"><span class="check">✓</span></div>
+
+                    <div class="grid-cell feature-name">Autonomous Task Execution</div>
+                    <div class="grid-cell"><span class="superior">✓✓</span></div>
+                    <div class="grid-cell"><span class="partial">Basic</span></div>
+                    <div class="grid-cell"><span class="check">✓</span></div>
+                    <div class="grid-cell"><span class="partial">Composer</span></div>
+
+                    <div class="grid-cell feature-name">CI/CD & Pipeline Integration</div>
+                    <div class="grid-cell"><span class="superior">✓✓</span></div>
+                    <div class="grid-cell"><span class="partial">Actions</span></div>
+                    <div class="grid-cell"><span class="none">✗</span></div>
+                    <div class="grid-cell"><span class="none">✗</span></div>
+
+                    <div class="grid-cell feature-name">Slack/Teams/Jira Integration</div>
+                    <div class="grid-cell"><span class="superior">✓✓</span></div>
+                    <div class="grid-cell"><span class="none">✗</span></div>
+                    <div class="grid-cell"><span class="none">✗</span></div>
+                    <div class="grid-cell"><span class="none">✗</span></div>
+
+                    <div class="grid-cell feature-name">SBOM & Supply Chain Security</div>
+                    <div class="grid-cell"><span class="superior">✓✓</span></div>
+                    <div class="grid-cell"><span class="none">✗</span></div>
+                    <div class="grid-cell"><span class="none">✗</span></div>
+                    <div class="grid-cell"><span class="none">✗</span></div>
+
+                    <div class="grid-cell feature-name">Auto-Fix Vulnerabilities</div>
+                    <div class="grid-cell"><span class="superior">✓✓</span></div>
+                    <div class="grid-cell"><span class="none">✗</span></div>
+                    <div class="grid-cell"><span class="none">✗</span></div>
+                    <div class="grid-cell"><span class="none">✗</span></div>
+
+                    <div class="grid-cell feature-name">Model Agnostic</div>
+                    <div class="grid-cell"><span class="superior">✓✓</span></div>
+                    <div class="grid-cell"><span class="none">OpenAI</span></div>
+                    <div class="grid-cell"><span class="none">Claude</span></div>
+                    <div class="grid-cell"><span class="check">✓</span></div>
+                </div>
+            </div>
+
+            <!-- Agentic Tools Comparison -->
+            <div class="comparison-section">
+                <span class="category-label agentic">AGENTIC TOOLS</span>
+                <div class="comparison-grid agentic">
+                    <div class="grid-header">Capability</div>
+                    <div class="grid-header factory">FactoryAI + Lineaje</div>
+                    <div class="grid-header agentic-header">Devin (Cognition)</div>
+                    <div class="grid-header agentic-header">Amazon Q Dev</div>
+                    <div class="grid-header agentic-header">Codeium/Windsurf</div>
+
+                    <div class="grid-cell feature-name">Full Task Autonomy</div>
+                    <div class="grid-cell"><span class="superior">✓✓</span></div>
+                    <div class="grid-cell"><span class="check">✓</span></div>
+                    <div class="grid-cell"><span class="partial">Limited</span></div>
+                    <div class="grid-cell"><span class="partial">Basic</span></div>
+
+                    <div class="grid-cell feature-name">Codebase Understanding</div>
+                    <div class="grid-cell"><span class="superior">✓✓</span></div>
+                    <div class="grid-cell"><span class="check">✓</span></div>
+                    <div class="grid-cell"><span class="check">✓</span></div>
+                    <div class="grid-cell"><span class="partial">Basic</span></div>
+
+                    <div class="grid-cell feature-name">Incident Response</div>
+                    <div class="grid-cell"><span class="superior">✓✓</span></div>
+                    <div class="grid-cell"><span class="partial">Manual</span></div>
+                    <div class="grid-cell"><span class="none">✗</span></div>
+                    <div class="grid-cell"><span class="none">✗</span></div>
+
+                    <div class="grid-cell feature-name">Parallelizable at Scale</div>
+                    <div class="grid-cell"><span class="superior">✓✓</span></div>
+                    <div class="grid-cell"><span class="partial">Limited</span></div>
+                    <div class="grid-cell"><span class="none">✗</span></div>
+                    <div class="grid-cell"><span class="none">✗</span></div>
+
+                    <div class="grid-cell feature-name">Self-Healing Containers</div>
+                    <div class="grid-cell"><span class="superior">✓✓</span></div>
+                    <div class="grid-cell"><span class="none">✗</span></div>
+                    <div class="grid-cell"><span class="none">✗</span></div>
+                    <div class="grid-cell"><span class="none">✗</span></div>
+
+                    <div class="grid-cell feature-name">Compliance (SOC2/FedRAMP)</div>
+                    <div class="grid-cell"><span class="superior">✓✓</span></div>
+                    <div class="grid-cell"><span class="partial">Limited</span></div>
+                    <div class="grid-cell"><span class="check">✓</span></div>
+                    <div class="grid-cell"><span class="partial">Basic</span></div>
+
+                    <div class="grid-cell feature-name">Enterprise Scale Proven</div>
+                    <div class="grid-cell"><span class="superior">✓✓</span></div>
+                    <div class="grid-cell"><span class="partial">Growing</span></div>
+                    <div class="grid-cell"><span class="check">✓</span></div>
+                    <div class="grid-cell"><span class="partial">Limited</span></div>
+
+                    <div class="grid-cell feature-name">Pricing Model</div>
+                    <div class="grid-cell"><span class="check">Flexible</span></div>
+                    <div class="grid-cell"><span class="partial">$20-500/mo</span></div>
+                    <div class="grid-cell"><span class="check">$19/mo</span></div>
+                    <div class="grid-cell"><span class="check">Free-$40</span></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="usp-section">
+            <div class="usp-box factory">
+                <h3>FactoryAI Droids - Unique Differentiators</h3>
+                <ul class="usp-list">
+                    <li>Autonomous end-to-end task completion (refactors, migrations, incident response)</li>
+                    <li>Multi-surface: IDE, CLI, Web, Slack/Teams, Linear, Jira - work where you are</li>
+                    <li>Parallelizable at massive scale for CI/CD, migrations & maintenance</li>
+                    <li>Model & vendor agnostic - works with any LLM provider</li>
+                    <li>#1 on Terminal-Bench benchmark (58.75% score)</li>
+                    <li>Enterprise proven: EY deployed to 5,000+ engineers globally</li>
+                </ul>
+            </div>
+            <div class="usp-box lineaje">
+                <h3>Lineaje SBOM360 - Unique Differentiators</h3>
+                <ul class="usp-list">
+                    <li>Agentic AI (BOMbots) for autonomous vulnerability detection & remediation</li>
+                    <li>Self-healing source code & containers with AI-generated fix plans</li>
+                    <li>Deep SBOM analysis across entire software supply chain</li>
+                    <li>GigaOm Leader & Outperformer in Software Supply Chain Security</li>
+                    <li>40% reduction in developer maintenance effort & upgrade costs</li>
+                    <li>Federal/DoD compliance ready (Lineaje Federal, NIST, EO 14028)</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="combined-value">
+            <h3>Combined Value: The Only Complete SDLC Security Solution</h3>
+            <p><strong>FactoryAI + Lineaje</strong> is the only solution combining <em>autonomous AI-driven development</em> with <em>full-lifecycle software supply chain security</em>. 
+            Build faster with Droids while Lineaje ensures every component is secure, compliant, and vulnerability-free - from code creation through production deployment. No competitor offers this end-to-end coverage.</p>
+            <div class="logo-row">
+                <span class="logo-badge factory">FactoryAI Droids</span>
+                <span style="color: #666; font-size: 1.2rem;">+</span>
+                <span class="logo-badge lineaje">Lineaje SBOM360</span>
+                <span style="color: #666; font-size: 1.2rem;">=</span>
+                <span class="logo-badge" style="background: rgba(74,144,217,0.2); color: #4a90d9;">Secure SDLC</span>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

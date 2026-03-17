@@ -1,5 +1,7 @@
 package com.oms.order.client;
 
+import com.oms.common.client.dto.CreateShipmentRequest;
+import com.oms.common.client.dto.ShipmentInfo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,10 +18,13 @@ public class ShippingClient {
     @Value("${services.shipping-url:http://localhost:8086}")
     private String shippingServiceUrl;
 
-    public ShipmentResponse createShipment(String orderId, String address) {
+    public ShipmentInfo createShipment(String orderId, String address) {
         try {
             String url = shippingServiceUrl + "/shipments";
-            ShipmentRequest request = new ShipmentRequest(orderId, address);
+            CreateShipmentRequest request = CreateShipmentRequest.builder()
+                    .orderId(orderId)
+                    .address(address)
+                    .build();
             ApiResponse response = restTemplate.postForObject(url, request, ApiResponse.class);
             return response != null ? response.getData() : null;
         } catch (Exception e) {
@@ -29,24 +34,7 @@ public class ShippingClient {
     }
 
     @lombok.Data
-    @lombok.AllArgsConstructor
-    @lombok.NoArgsConstructor
-    public static class ShipmentRequest {
-        private String orderId;
-        private String address;
-    }
-
-    @lombok.Data
-    public static class ApiResponse {
-        private ShipmentResponse data;
-    }
-
-    @lombok.Data
-    public static class ShipmentResponse {
-        private String id;
-        private String orderId;
-        private String trackingNumber;
-        private String carrier;
-        private String status;
+    private static class ApiResponse {
+        private ShipmentInfo data;
     }
 }

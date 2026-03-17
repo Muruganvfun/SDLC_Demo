@@ -1,5 +1,10 @@
 package com.oms.order.service;
 
+import com.oms.common.client.dto.PaymentInfo;
+import com.oms.common.client.dto.ProductInfo;
+import com.oms.common.client.dto.ReserveStockRequest.ReserveStockItem;
+import com.oms.common.client.dto.ReserveStockResponse;
+import com.oms.common.client.dto.ShipmentInfo;
 import com.oms.common.dto.PageResponse;
 import com.oms.common.exception.ApiException;
 import com.oms.order.client.*;
@@ -46,7 +51,7 @@ public class OrderService {
         BigDecimal total = BigDecimal.ZERO;
 
         for (CreateOrderRequest.OrderItemRequest itemRequest : request.getItems()) {
-            CatalogClient.ProductInfo product = catalogClient.getProduct(itemRequest.getProductId());
+            ProductInfo product = catalogClient.getProduct(itemRequest.getProductId());
             
             if (product == null) {
                 throw ApiException.badRequest("Product not found: " + itemRequest.getProductId());
@@ -73,11 +78,11 @@ public class OrderService {
         order.setTotalAmount(total);
         order = orderRepository.save(order);
 
-        List<InventoryClient.ReserveItem> reserveItems = request.getItems().stream()
-                .map(i -> new InventoryClient.ReserveItem(i.getProductId(), i.getQuantity()))
+        List<ReserveStockItem> reserveItems = request.getItems().stream()
+                .map(i -> new ReserveStockItem(i.getProductId(), i.getQuantity()))
                 .collect(Collectors.toList());
 
-        InventoryClient.ReserveResponse reserveResponse = inventoryClient.reserveStock(
+        ReserveStockResponse reserveResponse = inventoryClient.reserveStock(
                 order.getId().toString(), reserveItems);
 
         if (reserveResponse == null || !reserveResponse.isSuccess()) {
@@ -139,8 +144,8 @@ public class OrderService {
             throw ApiException.badRequest("Order cannot be cancelled in current status: " + order.getStatus());
         }
 
-        List<InventoryClient.ReserveItem> items = order.getItems().stream()
-                .map(i -> new InventoryClient.ReserveItem(i.getProductId().toString(), i.getQuantity()))
+        List<ReserveStockItem> items = order.getItems().stream()
+                .map(i -> new ReserveStockItem(i.getProductId().toString(), i.getQuantity()))
                 .collect(Collectors.toList());
 
         inventoryClient.releaseStock(orderId, items);
@@ -165,7 +170,7 @@ public class OrderService {
             throw ApiException.badRequest("Order is not in a payable status: " + order.getStatus());
         }
 
-        PaymentClient.PaymentResponse paymentResponse = paymentClient.processPayment(
+        PaymentInfo paymentResponse = paymentClient.processPayment(
                 orderId, order.getTotalAmount(), request.getPaymentMethod());
 
         if (paymentResponse == null || !"SUCCESS".equals(paymentResponse.getStatus())) {
@@ -176,7 +181,7 @@ public class OrderService {
         order.setStatus(Order.OrderStatus.PAID);
         order = orderRepository.save(order);
 
-        ShippingClient.ShipmentResponse shipmentResponse = shippingClient.createShipment(
+        ShipmentInfo shipmentResponse = shippingClient.createShipment(
                 orderId, order.getShippingAddress());
 
         if (shipmentResponse != null) {

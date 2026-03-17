@@ -1,6 +1,7 @@
 package com.oms.shipping.controller;
 
 import com.oms.common.dto.ApiResponse;
+import com.oms.common.security.UserContext;
 import com.oms.shipping.dto.ShipmentRequest;
 import com.oms.shipping.dto.ShipmentResponse;
 import com.oms.shipping.dto.UpdateStatusRequest;
@@ -49,10 +50,9 @@ public class ShippingController {
     public ResponseEntity<ApiResponse<ShipmentResponse>> updateStatus(
             @PathVariable String id,
             @Valid @RequestBody UpdateStatusRequest request,
-            @RequestHeader(value = "X-User-Roles", defaultValue = "") String roles) {
+            UserContext userContext) {
         log.info("Updating shipment {} status to: {}", id, request.getStatus());
-        boolean isAdmin = roles.contains("ADMIN");
-        ShipmentResponse response = shippingService.updateStatus(id, request, isAdmin);
+        ShipmentResponse response = shippingService.updateStatus(id, request, userContext.isAdmin());
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 }
