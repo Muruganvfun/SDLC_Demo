@@ -4,6 +4,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RouteProp } from '@react-navigation/native';
 import api from '../services/api';
 import { RootStackParamList } from '../navigation/AppNavigator';
+import { WiproColors, WiproBorderRadius, WiproShadow } from '../theme/WiproTheme';
 
 type OrderDetailScreenProps = {
   navigation: NativeStackNavigationProp<RootStackParamList, 'OrderDetail'>;
@@ -29,13 +30,13 @@ interface OrderDetail {
 
 const getStatusColor = (status: string) => {
   switch (status) {
-    case 'PENDING': return '#F59E0B';
-    case 'CONFIRMED': return '#3B82F6';
+    case 'PENDING': return WiproColors.warning;
+    case 'CONFIRMED': return WiproColors.primary;
     case 'PAID': return '#8B5CF6';
-    case 'SHIPPED': return '#10B981';
+    case 'SHIPPED': return WiproColors.success;
     case 'DELIVERED': return '#059669';
-    case 'CANCELLED': return '#EF4444';
-    default: return '#6B7280';
+    case 'CANCELLED': return WiproColors.error;
+    default: return WiproColors.gray[500];
   }
 };
 
@@ -178,29 +179,29 @@ const OrderDetailScreen: React.FC<OrderDetailScreenProps> = ({ navigation, route
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f5f5f5' },
-  centered: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, backgroundColor: '#fff' },
-  orderId: { fontSize: 20, fontWeight: 'bold', color: '#1F2937' },
-  statusBadge: { paddingHorizontal: 16, paddingVertical: 6, borderRadius: 16 },
-  statusText: { color: '#fff', fontWeight: 'bold' },
-  section: { backgroundColor: '#fff', marginTop: 12, padding: 16 },
-  sectionTitle: { fontSize: 16, fontWeight: 'bold', color: '#374151', marginBottom: 12 },
-  itemRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: '#E5E7EB' },
+  container: { flex: 1, backgroundColor: WiproColors.background },
+  centered: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: WiproColors.background },
+  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 16, backgroundColor: WiproColors.white, ...WiproShadow.card },
+  orderId: { fontSize: 20, fontWeight: '600', color: WiproColors.black },
+  statusBadge: { paddingHorizontal: 16, paddingVertical: 6, borderRadius: WiproBorderRadius.full },
+  statusText: { color: WiproColors.white, fontWeight: 'bold' },
+  section: { backgroundColor: WiproColors.white, marginTop: 12, padding: 16 },
+  sectionTitle: { fontSize: 16, fontWeight: '600', color: WiproColors.black, marginBottom: 12 },
+  itemRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: WiproColors.gray[200] },
   itemInfo: { flex: 1 },
-  itemName: { fontSize: 16, fontWeight: '500' },
-  itemQty: { fontSize: 14, color: '#6B7280' },
-  itemSubtotal: { fontSize: 16, fontWeight: 'bold', color: '#4F46E5' },
+  itemName: { fontSize: 16, fontWeight: '500', color: WiproColors.black },
+  itemQty: { fontSize: 14, color: WiproColors.gray[500] },
+  itemSubtotal: { fontSize: 16, fontWeight: 'bold', color: WiproColors.primary },
   totalRow: { flexDirection: 'row', justifyContent: 'space-between', paddingTop: 12, marginTop: 8 },
-  totalLabel: { fontSize: 18, fontWeight: 'bold' },
-  totalAmount: { fontSize: 24, fontWeight: 'bold', color: '#4F46E5' },
-  address: { fontSize: 14, color: '#6B7280', lineHeight: 22 },
-  infoText: { fontSize: 14, color: '#6B7280', marginBottom: 4 },
+  totalLabel: { fontSize: 18, fontWeight: 'bold', color: WiproColors.black },
+  totalAmount: { fontSize: 24, fontWeight: 'bold', color: WiproColors.primary },
+  address: { fontSize: 14, color: WiproColors.gray[500], lineHeight: 22 },
+  infoText: { fontSize: 14, color: WiproColors.gray[500], marginBottom: 4 },
   actions: { padding: 16, gap: 12 },
-  payButton: { backgroundColor: '#10B981', padding: 16, borderRadius: 8, alignItems: 'center' },
-  buttonText: { color: '#fff', fontSize: 18, fontWeight: 'bold' },
-  cancelButton: { backgroundColor: '#fff', padding: 16, borderRadius: 8, alignItems: 'center', borderWidth: 2, borderColor: '#EF4444' },
-  cancelButtonText: { color: '#EF4444', fontSize: 18, fontWeight: 'bold' },
+  payButton: { backgroundColor: WiproColors.primary, padding: 16, borderRadius: WiproBorderRadius.full, alignItems: 'center' },
+  buttonText: { color: WiproColors.white, fontSize: 18, fontWeight: '600' },
+  cancelButton: { backgroundColor: WiproColors.white, padding: 16, borderRadius: WiproBorderRadius.full, alignItems: 'center', borderWidth: 2, borderColor: WiproColors.error },
+  cancelButtonText: { color: WiproColors.error, fontSize: 18, fontWeight: '600' },
 });
 
 export default OrderDetailScreen;

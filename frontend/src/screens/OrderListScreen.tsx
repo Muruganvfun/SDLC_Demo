@@ -1,9 +1,10 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator, RefreshControl } from 'react-native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useFocusEffect } from '@react-navigation/native';
 import api from '../services/api';
 import { RootStackParamList } from '../navigation/AppNavigator';
+import { WiproColors, WiproBorderRadius, WiproShadow } from '../theme/WiproTheme';
 
 type OrderListScreenProps = {
   navigation: NativeStackNavigationProp<RootStackParamList, 'OrderList'>;
@@ -19,13 +20,13 @@ interface OrderSummary {
 
 const getStatusColor = (status: string) => {
   switch (status) {
-    case 'PENDING': return '#F59E0B';
-    case 'CONFIRMED': return '#3B82F6';
+    case 'PENDING': return WiproColors.warning;
+    case 'CONFIRMED': return WiproColors.primary;
     case 'PAID': return '#8B5CF6';
-    case 'SHIPPED': return '#10B981';
+    case 'SHIPPED': return WiproColors.success;
     case 'DELIVERED': return '#059669';
-    case 'CANCELLED': return '#EF4444';
-    default: return '#6B7280';
+    case 'CANCELLED': return WiproColors.error;
+    default: return WiproColors.gray[500];
   }
 };
 
@@ -108,32 +109,28 @@ const OrderListScreen: React.FC<OrderListScreenProps> = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f5f5f5' },
-  centered: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  container: { flex: 1, backgroundColor: WiproColors.background },
+  centered: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: WiproColors.background },
   list: { padding: 16 },
   orderCard: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
+    backgroundColor: WiproColors.white,
+    borderRadius: WiproBorderRadius.lg,
     padding: 16,
     marginBottom: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    ...WiproShadow.card,
   },
   orderHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
-  orderId: { fontSize: 16, fontWeight: 'bold', color: '#1F2937' },
-  statusBadge: { paddingHorizontal: 12, paddingVertical: 4, borderRadius: 12 },
-  statusText: { color: '#fff', fontSize: 12, fontWeight: 'bold' },
+  orderId: { fontSize: 16, fontWeight: '600', color: WiproColors.black },
+  statusBadge: { paddingHorizontal: 12, paddingVertical: 4, borderRadius: WiproBorderRadius.full },
+  statusText: { color: WiproColors.white, fontSize: 12, fontWeight: 'bold' },
   orderDetails: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 },
-  orderInfo: { fontSize: 14, color: '#6B7280' },
-  orderDate: { fontSize: 14, color: '#6B7280' },
-  orderTotal: { fontSize: 20, fontWeight: 'bold', color: '#4F46E5', textAlign: 'right' },
+  orderInfo: { fontSize: 14, color: WiproColors.gray[500] },
+  orderDate: { fontSize: 14, color: WiproColors.gray[500] },
+  orderTotal: { fontSize: 20, fontWeight: 'bold', color: WiproColors.primary, textAlign: 'right' },
   emptyContainer: { alignItems: 'center', paddingTop: 48 },
-  emptyText: { fontSize: 18, color: '#6B7280', marginBottom: 16 },
-  shopButton: { backgroundColor: '#4F46E5', paddingVertical: 12, paddingHorizontal: 24, borderRadius: 8 },
-  shopButtonText: { color: '#fff', fontWeight: 'bold', fontSize: 16 },
+  emptyText: { fontSize: 18, color: WiproColors.gray[500], marginBottom: 16 },
+  shopButton: { backgroundColor: WiproColors.primary, paddingVertical: 12, paddingHorizontal: 24, borderRadius: WiproBorderRadius.full },
+  shopButtonText: { color: WiproColors.white, fontWeight: '600', fontSize: 16 },
 });
 
 export default OrderListScreen;
