@@ -25,7 +25,8 @@
     },
     "web": {
       "favicon": "./assets/favicon.png",
-      "bundler": "metro"
+      "bundler": "metro",
+      "baseUrl": "/cue-sdlc-demo"
     },
     "experiments": {
       "baseUrl": "/cue-sdlc-demo"
