@@ -123,8 +123,8 @@ services:
 
   auth-service:
     build:
-      context: ./backend/auth-service
-      dockerfile: Dockerfile
+      context: ./backend
+      dockerfile: auth-service/Dockerfile
     container_name: oms-auth-service
     environment:
       SPRING_PROFILES_ACTIVE: docker
@@ -144,8 +144,8 @@ services:
 
   catalog-service:
     build:
-      context: ./backend/catalog-service
-      dockerfile: Dockerfile
+      context: ./backend
+      dockerfile: catalog-service/Dockerfile
     container_name: oms-catalog-service
     environment:
       SPRING_PROFILES_ACTIVE: docker
@@ -164,8 +164,8 @@ services:
 
   order-service:
     build:
-      context: ./backend/order-service
-      dockerfile: Dockerfile
+      context: ./backend
+      dockerfile: order-service/Dockerfile
     container_name: oms-order-service
     environment:
       SPRING_PROFILES_ACTIVE: docker
@@ -188,8 +188,8 @@ services:
 
   inventory-service:
     build:
-      context: ./backend/inventory-service
-      dockerfile: Dockerfile
+      context: ./backend
+      dockerfile: inventory-service/Dockerfile
     container_name: oms-inventory-service
     environment:
       SPRING_PROFILES_ACTIVE: docker
@@ -208,8 +208,8 @@ services:
 
   payment-service:
     build:
-      context: ./backend/payment-service
-      dockerfile: Dockerfile
+      context: ./backend
+      dockerfile: payment-service/Dockerfile
     container_name: oms-payment-service
     environment:
       SPRING_PROFILES_ACTIVE: docker
@@ -228,8 +228,8 @@ services:
 
   shipping-service:
     build:
-      context: ./backend/shipping-service
-      dockerfile: Dockerfile
+      context: ./backend
+      dockerfile: shipping-service/Dockerfile
     container_name: oms-shipping-service
     environment:
       SPRING_PROFILES_ACTIVE: docker
@@ -248,8 +248,8 @@ services:
 
   notification-service:
     build:
-      context: ./backend/notification-service
-      dockerfile: Dockerfile
+      context: ./backend
+      dockerfile: notification-service/Dockerfile
     container_name: oms-notification-service
     environment:
       SPRING_PROFILES_ACTIVE: docker
@@ -267,8 +267,8 @@ services:
 
   api-gateway:
     build:
-      context: ./backend/api-gateway
-      dockerfile: Dockerfile
+      context: ./backend
+      dockerfile: api-gateway/Dockerfile
     container_name: oms-api-gateway
     ports:
       - "8090:8080"    # External port 8090 to avoid conflicts
