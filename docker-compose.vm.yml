@@ -275,7 +275,6 @@ services:
     environment:
       SPRING_PROFILES_ACTIVE: docker
       JWT_SECRET: ${JWT_SECRET:-OMS_JWT_SECRET_KEY_MINIMUM_256_BITS_FOR_HS256_ALGORITHM_SECURITY}
-      CORS_ALLOWED_ORIGINS: "https://wingsdemo.waip.wiprocms.com,http://localhost:3000,http://localhost:19006"
     depends_on:
       - auth-service
       - catalog-service
