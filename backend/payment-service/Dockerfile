@@ -9,7 +9,7 @@ RUN mvn -pl payment-service package -DskipTests -am
 # Run stage
 FROM eclipse-temurin:17-jre-alpine
 WORKDIR /app
-COPY --from=build /app/payment-service/target/*.jar app.jar
+COPY --from=build /app/payment-service/target/*.war app.jar
 RUN apk add --no-cache curl
 EXPOSE 8085
 ENTRYPOINT ["java", "-jar", "app.jar"]

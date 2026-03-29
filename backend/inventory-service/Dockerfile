@@ -9,7 +9,7 @@ RUN mvn -pl inventory-service package -DskipTests -am
 # Run stage
 FROM eclipse-temurin:17-jre-alpine
 WORKDIR /app
-COPY --from=build /app/inventory-service/target/*.jar app.jar
+COPY --from=build /app/inventory-service/target/*.war app.jar
 RUN apk add --no-cache curl
 EXPOSE 8084
 ENTRYPOINT ["java", "-jar", "app.jar"]
