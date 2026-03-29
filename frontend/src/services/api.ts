@@ -1,6 +1,6 @@
 import axios, { AxiosInstance, AxiosError } from 'axios';
 
-const API_BASE_URL = '/cue-sdlc-demo/api';
+const API_BASE_URL = '/poc/cue-sdlc-demo/api';
 console.log('API Base URL:', API_BASE_URL);
 
 class ApiService {
