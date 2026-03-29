@@ -1,10 +1,8 @@
 # Build stage
 FROM maven:3.9-eclipse-temurin-17 AS build
 WORKDIR /app
-COPY pom.xml ./pom.xml
-COPY api-gateway/pom.xml ./api-gateway/pom.xml
-COPY api-gateway/src ./api-gateway/src
-RUN mvn -f api-gateway/pom.xml package -DskipTests
+COPY . .
+RUN mvn -pl api-gateway package -DskipTests
 
 # Run stage
 FROM eclipse-temurin:17-jre-alpine
