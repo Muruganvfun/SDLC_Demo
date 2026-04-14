@@ -1,0 +1,16 @@
+[Unit]
+Description=SDLC-POC Webhook Listener
+Documentation=https://github.com/adnanh/webhook
+After=network.target
+
+[Service]
+Type=simple
+User=aiopslinuxadmin
+ExecStart=/usr/bin/webhook -hooks /home/aiopslinuxadmin/SDLC_Demo/scripts/webhook/hooks.json -port 9000 -verbose
+Restart=on-failure
+RestartSec=5
+StandardOutput=append:/var/log/webhook.log
+StandardError=append:/var/log/webhook.log
+
+[Install]
+WantedBy=multi-user.target

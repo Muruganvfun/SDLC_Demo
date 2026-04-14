@@ -1,0 +1,22 @@
+[
+  {
+    "id": "deploy-sdlc",
+    "execute-command": "/home/aiopslinuxadmin/SDLC_Demo/scripts/deploy.sh",
+    "command-working-directory": "/home/aiopslinuxadmin/SDLC_Demo",
+    "response-message": "SDLC-POC deployment triggered!",
+    "trigger-rule": {
+      "and": [
+        {
+          "match": {
+            "type": "value",
+            "value": "sdlc-deploy-secret-2026",
+            "parameter": {
+              "source": "header",
+              "name": "X-Deploy-Token"
+            }
+          }
+        }
+      ]
+    }
+  }
+]
