@@ -181,8 +181,10 @@ newgrp docker
 
 | File | Location |
 |------|----------|
-| Deploy script | `/home/aiopslinuxadmin/SDLC_Demo/scripts/deploy.sh` |
-| Webhook config | `/home/aiopslinuxadmin/SDLC_Demo/scripts/webhook/hooks.json` |
+| Git Repo | `/data/CUE-POC/SDLC-POC` |
+| Frontend (Nginx) | `/var/www/html/cue-sdlc-demo` |
+| Deploy script | `/data/CUE-POC/SDLC-POC/scripts/deploy.sh` |
+| Webhook config | `/data/CUE-POC/SDLC-POC/scripts/webhook/hooks.json` |
 | Systemd service | `/etc/systemd/system/webhook.service` |
 | Webhook log | `/var/log/webhook.log` |
 | Deploy log | `/var/log/sdlc-deploy.log` |

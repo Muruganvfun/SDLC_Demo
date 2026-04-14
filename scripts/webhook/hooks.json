@@ -1,8 +1,8 @@
 [
   {
     "id": "deploy-sdlc",
-    "execute-command": "/home/aiopslinuxadmin/SDLC_Demo/scripts/deploy.sh",
-    "command-working-directory": "/home/aiopslinuxadmin/SDLC_Demo",
+    "execute-command": "/data/CUE-POC/SDLC-POC/scripts/deploy.sh",
+    "command-working-directory": "/data/CUE-POC/SDLC-POC",
     "response-message": "SDLC-POC deployment triggered!",
     "trigger-rule": {
       "and": [

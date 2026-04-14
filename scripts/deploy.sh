@@ -9,7 +9,8 @@
 set -e  # Exit on any error
 
 # Configuration
-APP_DIR="/home/aiopslinuxadmin/SDLC_Demo"
+APP_DIR="/data/CUE-POC/SDLC-POC"
+FRONTEND_DIR="/var/www/html/cue-sdlc-demo"
 COMPOSE_FILE="docker-compose.vm.yml"
 BRANCH="develop"
 LOG_FILE="/var/log/sdlc-deploy.log"
@@ -45,7 +46,7 @@ git pull origin "$BRANCH"
 
 log "Latest commit: $(git log -1 --oneline)"
 
-# Build and deploy containers
+# Build and deploy backend containers
 log "${YELLOW}Building Docker images...${NC}"
 docker-compose -f "$COMPOSE_FILE" build --parallel
 
@@ -54,6 +55,18 @@ docker-compose -f "$COMPOSE_FILE" down
 
 log "${YELLOW}Starting new containers...${NC}"
 docker-compose -f "$COMPOSE_FILE" up -d
+
+# Deploy frontend to Nginx
+log "${YELLOW}Deploying frontend to Nginx...${NC}"
+if [ -d "frontend/dist" ]; then
+    cp -r frontend/dist/* "$FRONTEND_DIR/"
+    log "Frontend deployed to $FRONTEND_DIR"
+elif [ -d "frontend/build" ]; then
+    cp -r frontend/build/* "$FRONTEND_DIR/"
+    log "Frontend deployed to $FRONTEND_DIR"
+else
+    log "${YELLOW}No frontend build found, skipping frontend deployment${NC}"
+fi
 
 # Wait for services to be healthy
 log "${YELLOW}Waiting for services to be healthy...${NC}"
