@@ -1,0 +1,158 @@
+# ============================================
+# Lineaje Configuration for Order Management System
+# ============================================
+
+project:
+  name: order-management-system
+  description: "Microservices-based Order Management System"
+  version: "1.0.0"
+  repository: "https://github.com/your-org/sdlc-demo"
+
+# Lineaje API Configuration
+api:
+  endpoint: "https://api.lineaje.com/v1"
+  # API key should be set via environment variable: LINEAJE_API_KEY
+  # Organization ID via: LINEAJE_ORG_ID
+
+# Scanning Configuration
+scan:
+  # Scan type: quick (deps only), full (deps + containers)
+  default_type: "quick"
+  
+  # Include transitive dependencies
+  include_transitive: true
+  
+  # Severity threshold for failing builds
+  fail_on_severity: "CRITICAL"
+  
+  # Maximum high vulnerabilities before warning
+  high_vulnerability_threshold: 5
+
+# SBOM Generation
+sbom:
+  # Output format: cyclonedx, spdx
+  format: "cyclonedx"
+  
+  # Include license information
+  include_licenses: true
+  
+  # Output directory (relative to project root)
+  output_dir: ".lineaje/reports"
+
+# Source Code Scanning (SCA360)
+sca360:
+  enabled: true
+  
+  # Languages/ecosystems to scan
+  ecosystems:
+    - java:
+        package_manager: "maven"
+        manifest_files:
+          - "backend/pom.xml"
+    - javascript:
+        package_manager: "npm"
+        manifest_files:
+          - "frontend/package.json"
+  
+  # Exclude certain dependencies from scanning
+  exclusions:
+    - "test-dependencies"
+    - "*-mock"
+
+# Auto-Remediation (SBOM360)
+sbom360:
+  enabled: true
+  
+  # Fix strategy: compatible (minor/patch), major (allows major bumps), custom
+  fix_strategy: "compatible"
+  
+  # Auto-create pull requests for fixes
+  auto_create_pr: false
+  
+  # Require approval before applying fixes
+  require_approval: true
+  
+  # Maximum PRs to create per scan
+  max_prs_per_scan: 5
+
+# Container Scanning
+containers:
+  enabled: true
+  
+  # Dockerfiles to scan
+  dockerfiles:
+    - "backend/api-gateway/Dockerfile"
+    - "backend/auth-service/Dockerfile"
+    - "backend/catalog-service/Dockerfile"
+    - "backend/order-service/Dockerfile"
+    - "backend/inventory-service/Dockerfile"
+    - "backend/payment-service/Dockerfile"
+    - "backend/shipping-service/Dockerfile"
+    - "backend/notification-service/Dockerfile"
+    - "frontend/Dockerfile"
+  
+  # Enable self-healing containers
+  self_healing: true
+
+# Compliance (SBOM360 Hub)
+compliance:
+  enabled: true
+  
+  # Compliance frameworks to validate
+  frameworks:
+    - "EO_14028"
+    - "NIST_SSDF"
+    - "CRA"
+  
+  # Generate VEX documents
+  generate_vex: true
+  
+  # VEX format: csaf, cyclonedx
+  vex_format: "csaf"
+  
+  # Generate attestation
+  generate_attestation: true
+
+# Notifications
+notifications:
+  # Notify on critical vulnerabilities
+  on_critical: true
+  
+  # Notify on scan completion
+  on_scan_complete: true
+  
+  # Notification channels (configure in Lineaje dashboard)
+  channels:
+    - "slack"
+    - "email"
+
+# CI/CD Integration
+ci_cd:
+  # Azure DevOps
+  azure_devops:
+    enabled: true
+    pipeline: ".azure/pipelines/lineaje-security-pipeline.yml"
+  
+  # GitHub Actions (if needed)
+  github_actions:
+    enabled: false
+    workflow: ".github/workflows/lineaje-security.yml"
+
+# Reporting
+reporting:
+  # Generate HTML report
+  html_report: true
+  
+  # Generate JSON report (machine-readable)
+  json_report: true
+  
+  # Report retention days
+  retention_days: 90
+
+# Factory.AI Integration
+factory_ai:
+  # Enable Factory.AI droid for remediation
+  remediation_droid: true
+  
+  # Droid configuration path
+  droid_config: ".factory/droids/lineaje-remediation.yaml"

@@ -1,0 +1,7 @@
+# Ignore Lineaje reports (generated during CI/CD)
+reports/
+*.json
+!config.yaml
+
+# Keep README
+!README.md
