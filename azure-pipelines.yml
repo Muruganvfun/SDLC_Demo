@@ -4,6 +4,16 @@
 # Repository: SDLC-POC
 # Organization: HOLMES-APPS
 # ============================================
+# PIPELINES:
+#   - This file: Main CI (Build & Test)
+#   - .azure/pipelines/cd-pipeline.yml: Docker & Deploy
+#   - .azure/pipelines/lineaje-security-pipeline.yml: Security scanning (Lineaje)
+#
+# LINEAJE INTEGRATION:
+#   Set these variables in Azure DevOps Library:
+#   - LINEAJE_API_KEY (secret): Your Lineaje API key
+#   - LINEAJE_ORG_ID: Your Lineaje organization ID
+#
 # NOTE: Docker & Deploy stages are in separate file (.azure/pipelines/cd-pipeline.yml)
 # Enable them after configuring Azure Service Connection
 # ============================================
@@ -42,7 +52,7 @@ stages:
   - job: BackendBuild
     displayName: 'Backend Build & Test'
     pool:
-      vmImage: 'ubuntu-latest'
+      name: 'CUE-Pool'
     
     services:
       postgres:
@@ -141,7 +151,7 @@ stages:
   - job: FrontendBuild
     displayName: 'Frontend Build & Test'
     pool:
-      vmImage: 'ubuntu-latest'
+      name: 'CUE-Pool'
 
     steps:
     - task: NodeTool@0
@@ -217,7 +227,7 @@ stages:
   - job: SecurityScan
     displayName: 'Security Scanning (OWASP)'
     pool:
-      vmImage: 'ubuntu-latest'
+      name: 'CUE-Pool'
     steps:
     - task: JavaToolInstaller@0
       inputs:
