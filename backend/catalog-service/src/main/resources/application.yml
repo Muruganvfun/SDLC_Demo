@@ -62,3 +62,7 @@ spring:
 
 services:
   inventory-url: http://inventory-service:8084
+
+  h2:
+    console:
+      enabled: false

@@ -25,7 +25,11 @@
     },
     "web": {
       "favicon": "./assets/favicon.png",
-      "bundler": "metro"
+      "bundler": "metro",
+      "baseUrl": "/poc/cue-sdlc-demo"
+    },
+    "experiments": {
+      "baseUrl": "/poc/cue-sdlc-demo"
     },
     "extra": {
       "apiBaseUrl": "http://localhost:8080/api"

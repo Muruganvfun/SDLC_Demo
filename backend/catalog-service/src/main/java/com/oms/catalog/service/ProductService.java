@@ -4,6 +4,8 @@ import com.oms.catalog.dto.ProductRequest;
 import com.oms.catalog.dto.ProductResponse;
 import com.oms.catalog.entity.Product;
 import com.oms.catalog.repository.ProductRepository;
+import com.oms.common.client.dto.InitializeInventoryRequest;
+import com.oms.common.client.dto.InventoryInfo;
 import com.oms.common.dto.PageResponse;
 import com.oms.common.exception.ApiException;
 import lombok.RequiredArgsConstructor;
@@ -123,7 +125,7 @@ public class ProductService {
     private ProductResponse enrichWithStock(Product product) {
         try {
             String url = inventoryServiceUrl + "/inventory/" + product.getId();
-            InventoryResponse inventory = restTemplate.getForObject(url, InventoryResponse.class);
+            InventoryInfo inventory = restTemplate.getForObject(url, InventoryInfo.class);
             if (inventory != null) {
                 return ProductResponse.from(product, inventory.getAvailableQuantity());
             }
@@ -136,27 +138,13 @@ public class ProductService {
     private void initializeInventory(String productId, int quantity) {
         try {
             String url = inventoryServiceUrl + "/inventory/initialize";
-            restTemplate.postForObject(url, new InventoryInitRequest(productId, quantity), Void.class);
+            InitializeInventoryRequest request = InitializeInventoryRequest.builder()
+                    .productId(productId)
+                    .quantity(quantity)
+                    .build();
+            restTemplate.postForObject(url, request, Void.class);
         } catch (Exception e) {
             log.warn("Could not initialize inventory for product {}: {}", productId, e.getMessage());
         }
-    }
-
-    @lombok.Data
-    @lombok.NoArgsConstructor
-    @lombok.AllArgsConstructor
-    private static class InventoryResponse {
-        private String productId;
-        private int quantity;
-        private int reservedQuantity;
-        private int availableQuantity;
-    }
-
-    @lombok.Data
-    @lombok.NoArgsConstructor
-    @lombok.AllArgsConstructor
-    private static class InventoryInitRequest {
-        private String productId;
-        private int quantity;
     }
 }

@@ -5,6 +5,7 @@ import com.oms.catalog.dto.ProductResponse;
 import com.oms.catalog.service.ProductService;
 import com.oms.common.dto.ApiResponse;
 import com.oms.common.dto.PageResponse;
+import com.oms.common.security.UserContext;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -40,10 +41,9 @@ public class ProductController {
     @PostMapping
     public ResponseEntity<ApiResponse<ProductResponse>> createProduct(
             @Valid @RequestBody ProductRequest request,
-            @RequestHeader(value = "X-User-Roles", defaultValue = "") String roles) {
+            UserContext userContext) {
         log.info("Creating product: {}", request.getName());
-        boolean isAdmin = roles.contains("ADMIN");
-        ProductResponse product = productService.createProduct(request, isAdmin);
+        ProductResponse product = productService.createProduct(request, userContext.isAdmin());
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.created(product));
     }
@@ -52,20 +52,18 @@ public class ProductController {
     public ResponseEntity<ApiResponse<ProductResponse>> updateProduct(
             @PathVariable String id,
             @Valid @RequestBody ProductRequest request,
-            @RequestHeader(value = "X-User-Roles", defaultValue = "") String roles) {
+            UserContext userContext) {
         log.info("Updating product: {}", id);
-        boolean isAdmin = roles.contains("ADMIN");
-        ProductResponse product = productService.updateProduct(id, request, isAdmin);
+        ProductResponse product = productService.updateProduct(id, request, userContext.isAdmin());
         return ResponseEntity.ok(ApiResponse.success(product));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteProduct(
             @PathVariable String id,
-            @RequestHeader(value = "X-User-Roles", defaultValue = "") String roles) {
+            UserContext userContext) {
         log.info("Deleting product: {}", id);
-        boolean isAdmin = roles.contains("ADMIN");
-        productService.deleteProduct(id, isAdmin);
+        productService.deleteProduct(id, userContext.isAdmin());
         return ResponseEntity.noContent().build();
     }
 }

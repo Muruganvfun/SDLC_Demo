@@ -1,6 +1,7 @@
 package com.oms.inventory.controller;
 
 import com.oms.common.dto.ApiResponse;
+import com.oms.common.security.UserContext;
 import com.oms.inventory.dto.*;
 import com.oms.inventory.service.InventoryService;
 import jakarta.validation.Valid;
@@ -68,10 +69,9 @@ public class InventoryController {
     public ResponseEntity<ApiResponse<InventoryResponse>> updateInventory(
             @PathVariable String productId,
             @Valid @RequestBody InventoryUpdateRequest request,
-            @RequestHeader(value = "X-User-Roles", defaultValue = "") String roles) {
+            UserContext userContext) {
         log.info("Updating inventory for product: {}", productId);
-        boolean isAdmin = roles.contains("ADMIN");
-        InventoryResponse response = inventoryService.updateInventory(productId, request, isAdmin);
+        InventoryResponse response = inventoryService.updateInventory(productId, request, userContext.isAdmin());
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 }

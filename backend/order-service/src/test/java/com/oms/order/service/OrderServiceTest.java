@@ -1,5 +1,9 @@
 package com.oms.order.service;
 
+import com.oms.common.client.dto.PaymentInfo;
+import com.oms.common.client.dto.ProductInfo;
+import com.oms.common.client.dto.ReserveStockResponse;
+import com.oms.common.client.dto.ShipmentInfo;
 import com.oms.common.dto.PageResponse;
 import com.oms.common.exception.ApiException;
 import com.oms.order.client.*;
@@ -55,7 +59,7 @@ class OrderServiceTest {
     private UUID orderId;
     private UUID productId;
     private Order testOrder;
-    private CatalogClient.ProductInfo testProduct;
+    private ProductInfo testProduct;
 
     @BeforeEach
     void setUp() {
@@ -63,7 +67,7 @@ class OrderServiceTest {
         orderId = UUID.randomUUID();
         productId = UUID.randomUUID();
 
-        testProduct = new CatalogClient.ProductInfo();
+        testProduct = new ProductInfo();
         testProduct.setId(productId.toString());
         testProduct.setName("Test Product");
         testProduct.setPrice(new BigDecimal("29.99"));
@@ -113,7 +117,7 @@ class OrderServiceTest {
                 return order;
             });
             
-            InventoryClient.ReserveResponse reserveResponse = new InventoryClient.ReserveResponse();
+            ReserveStockResponse reserveResponse = new ReserveStockResponse();
             reserveResponse.setSuccess(true);
             when(inventoryClient.reserveStock(anyString(), anyList())).thenReturn(reserveResponse);
 
@@ -185,7 +189,7 @@ class OrderServiceTest {
                 return order;
             });
 
-            InventoryClient.ReserveResponse reserveResponse = new InventoryClient.ReserveResponse();
+            ReserveStockResponse reserveResponse = new ReserveStockResponse();
             reserveResponse.setSuccess(false);
             reserveResponse.setError("Insufficient stock");
             when(inventoryClient.reserveStock(anyString(), anyList())).thenReturn(reserveResponse);
@@ -340,11 +344,11 @@ class OrderServiceTest {
             // Given
             PaymentRequest request = PaymentRequest.builder().paymentMethod("CREDIT_CARD").build();
 
-            PaymentClient.PaymentResponse paymentResponse = new PaymentClient.PaymentResponse();
+            PaymentInfo paymentResponse = new PaymentInfo();
             paymentResponse.setStatus("SUCCESS");
             paymentResponse.setTransactionId("TXN123");
 
-            ShippingClient.ShipmentResponse shipmentResponse = new ShippingClient.ShipmentResponse();
+            ShipmentInfo shipmentResponse = new ShipmentInfo();
             shipmentResponse.setTrackingNumber("TRACK123");
 
             when(orderRepository.findByIdWithItems(orderId)).thenReturn(Optional.of(testOrder));
@@ -367,7 +371,7 @@ class OrderServiceTest {
             // Given
             PaymentRequest request = PaymentRequest.builder().paymentMethod("CREDIT_CARD").build();
 
-            PaymentClient.PaymentResponse paymentResponse = new PaymentClient.PaymentResponse();
+            PaymentInfo paymentResponse = new PaymentInfo();
             paymentResponse.setStatus("FAILED");
 
             when(orderRepository.findByIdWithItems(orderId)).thenReturn(Optional.of(testOrder));

@@ -4,6 +4,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import api from '../services/api';
 import { useCart } from '../context/CartContext';
 import { RootStackParamList } from '../navigation/AppNavigator';
+import { WiproColors, WiproBorderRadius, WiproShadow } from '../theme/WiproTheme';
 
 type CreateOrderScreenProps = {
   navigation: NativeStackNavigationProp<RootStackParamList, 'CreateOrder'>;
@@ -51,24 +52,36 @@ const CreateOrderScreen: React.FC<CreateOrderScreenProps> = ({ navigation }) => 
       }));
 
       // Step 1: Create Order
-      console.log('Creating order...');
+      console.log('Creating order with items:', JSON.stringify(orderItems));
+      console.log('Shipping address:', JSON.stringify(address));
       const orderResponse = await api.createOrder(orderItems, address);
+      console.log('Order response:', JSON.stringify(orderResponse));
+      
+      if (!orderResponse.data?.id) {
+        throw new Error('Order creation failed - no order ID returned');
+      }
+      
       const orderId = orderResponse.data.id;
       setCreatedOrderId(orderId);
-      console.log('Order created:', orderId);
+      console.log('Order created successfully:', orderId);
 
       // Step 2: Process Payment
-      console.log('Processing payment with method:', selectedPayment.id);
-      await api.payOrder(orderId, selectedPayment.id);
-      console.log('Payment successful');
+      console.log('Processing payment for order:', orderId, 'with method:', selectedPayment.id);
+      const paymentResponse = await api.payOrder(orderId, selectedPayment.id);
+      console.log('Payment response:', JSON.stringify(paymentResponse));
+      console.log('Payment successful!');
 
-      // Success
-      setOrderStep('success');
+      // Success - update state
       clearCart();
+      setOrderStep('success');
+      console.log('Order flow completed successfully');
     } catch (err: any) {
       console.error('Order/Payment error:', err);
+      console.error('Error response:', err.response?.data);
+      console.error('Error status:', err.response?.status);
       setOrderStep('cart');
-      Alert.alert('Error', err.response?.data?.message || 'Failed to process order');
+      const errorMessage = err.response?.data?.message || err.message || 'Failed to process order';
+      Alert.alert('Order Error', errorMessage);
     } finally {
       setLoading(false);
     }
@@ -235,71 +248,72 @@ const CreateOrderScreen: React.FC<CreateOrderScreenProps> = ({ navigation }) => 
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f5f5f5', padding: 16 },
-  sectionTitle: { fontSize: 18, fontWeight: 'bold', marginBottom: 12, color: '#374151' },
+  container: { flex: 1, backgroundColor: WiproColors.background, padding: 16 },
+  sectionTitle: { fontSize: 18, fontWeight: '600', marginBottom: 12, color: WiproColors.black },
   cartList: { maxHeight: 200 },
   cartItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#fff',
+    backgroundColor: WiproColors.white,
     padding: 12,
-    borderRadius: 8,
+    borderRadius: WiproBorderRadius.md,
     marginBottom: 8,
+    ...WiproShadow.card,
   },
   itemInfo: { flex: 1 },
-  itemName: { fontSize: 16, fontWeight: '600' },
-  itemPrice: { fontSize: 12, color: '#6B7280' },
+  itemName: { fontSize: 16, fontWeight: '600', color: WiproColors.black },
+  itemPrice: { fontSize: 12, color: WiproColors.gray[500] },
   quantityControls: { flexDirection: 'row', alignItems: 'center', marginHorizontal: 8 },
-  qtyButton: { backgroundColor: '#E5E7EB', width: 28, height: 28, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
-  qtyButtonText: { fontSize: 18, fontWeight: 'bold' },
-  quantity: { marginHorizontal: 12, fontSize: 16, fontWeight: '600' },
-  subtotal: { fontSize: 16, fontWeight: 'bold', color: '#4F46E5', marginRight: 8, width: 60, textAlign: 'right' },
-  removeButton: { color: '#EF4444', fontWeight: 'bold', fontSize: 16 },
+  qtyButton: { backgroundColor: WiproColors.gray[200], width: 28, height: 28, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
+  qtyButtonText: { fontSize: 18, fontWeight: 'bold', color: WiproColors.black },
+  quantity: { marginHorizontal: 12, fontSize: 16, fontWeight: '600', color: WiproColors.black },
+  subtotal: { fontSize: 16, fontWeight: 'bold', color: WiproColors.primary, marginRight: 8, width: 60, textAlign: 'right' },
+  removeButton: { color: WiproColors.error, fontWeight: 'bold', fontSize: 16 },
   emptyContainer: { alignItems: 'center', padding: 20 },
-  emptyText: { textAlign: 'center', color: '#6B7280', marginBottom: 16 },
-  shopButton: { backgroundColor: '#4F46E5', paddingVertical: 12, paddingHorizontal: 24, borderRadius: 8 },
-  shopButtonText: { color: '#fff', fontWeight: 'bold', fontSize: 16 },
+  emptyText: { textAlign: 'center', color: WiproColors.gray[500], marginBottom: 16 },
+  shopButton: { backgroundColor: WiproColors.primary, paddingVertical: 12, paddingHorizontal: 24, borderRadius: WiproBorderRadius.full },
+  shopButtonText: { color: WiproColors.white, fontWeight: '600', fontSize: 16 },
   addressSection: { marginTop: 16 },
-  input: { backgroundColor: '#fff', borderWidth: 1, borderColor: '#ddd', borderRadius: 8, padding: 12, marginBottom: 8 },
+  input: { backgroundColor: WiproColors.white, borderWidth: 1, borderColor: WiproColors.gray[300], borderRadius: WiproBorderRadius.md, padding: 12, marginBottom: 8, color: WiproColors.black },
   row: { flexDirection: 'row', justifyContent: 'space-between' },
   halfInput: { width: '48%' },
-  totalSection: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 16, paddingVertical: 16, borderTopWidth: 1, borderTopColor: '#E5E7EB' },
-  totalLabel: { fontSize: 20, fontWeight: 'bold' },
-  totalAmount: { fontSize: 24, fontWeight: 'bold', color: '#4F46E5' },
-  placeOrderButton: { backgroundColor: '#10B981', padding: 16, borderRadius: 8, alignItems: 'center', marginTop: 16 },
-  buttonDisabled: { backgroundColor: '#9CA3AF' },
-  placeOrderText: { color: '#fff', fontSize: 18, fontWeight: 'bold' },
+  totalSection: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 16, paddingVertical: 16, borderTopWidth: 1, borderTopColor: WiproColors.gray[200] },
+  totalLabel: { fontSize: 20, fontWeight: 'bold', color: WiproColors.black },
+  totalAmount: { fontSize: 24, fontWeight: 'bold', color: WiproColors.primary },
+  placeOrderButton: { backgroundColor: WiproColors.primary, padding: 16, borderRadius: WiproBorderRadius.full, alignItems: 'center', marginTop: 16, ...WiproShadow.medium },
+  buttonDisabled: { backgroundColor: WiproColors.gray[300] },
+  placeOrderText: { color: WiproColors.white, fontSize: 18, fontWeight: '600' },
   // Modal styles
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', alignItems: 'center' },
-  modalContent: { backgroundColor: '#fff', borderRadius: 16, padding: 24, width: '90%', maxWidth: 400 },
-  modalTitle: { fontSize: 22, fontWeight: 'bold', textAlign: 'center', marginBottom: 20, color: '#1F2937' },
-  paymentOption: { flexDirection: 'row', alignItems: 'center', padding: 16, borderWidth: 2, borderColor: '#E5E7EB', borderRadius: 12, marginBottom: 12 },
-  paymentOptionSelected: { borderColor: '#4F46E5', backgroundColor: '#EEF2FF' },
+  modalContent: { backgroundColor: WiproColors.white, borderRadius: WiproBorderRadius.xl, padding: 24, width: '90%', maxWidth: 400 },
+  modalTitle: { fontSize: 22, fontWeight: 'bold', textAlign: 'center', marginBottom: 20, color: WiproColors.black },
+  paymentOption: { flexDirection: 'row', alignItems: 'center', padding: 16, borderWidth: 2, borderColor: WiproColors.gray[200], borderRadius: WiproBorderRadius.md, marginBottom: 12 },
+  paymentOptionSelected: { borderColor: WiproColors.primary, backgroundColor: '#EDF2F9' },
   paymentIcon: { fontSize: 24, marginRight: 12 },
-  paymentName: { fontSize: 16, fontWeight: '600', flex: 1 },
-  checkmark: { fontSize: 20, color: '#4F46E5', fontWeight: 'bold' },
-  modalSummary: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 16, borderTopWidth: 1, borderTopColor: '#E5E7EB', marginTop: 8 },
-  modalSummaryLabel: { fontSize: 16, color: '#6B7280' },
-  modalSummaryAmount: { fontSize: 24, fontWeight: 'bold', color: '#4F46E5' },
-  payNowButton: { backgroundColor: '#10B981', padding: 16, borderRadius: 12, alignItems: 'center', marginTop: 16 },
-  payNowText: { color: '#fff', fontSize: 16, fontWeight: 'bold' },
+  paymentName: { fontSize: 16, fontWeight: '600', flex: 1, color: WiproColors.black },
+  checkmark: { fontSize: 20, color: WiproColors.primary, fontWeight: 'bold' },
+  modalSummary: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 16, borderTopWidth: 1, borderTopColor: WiproColors.gray[200], marginTop: 8 },
+  modalSummaryLabel: { fontSize: 16, color: WiproColors.gray[500] },
+  modalSummaryAmount: { fontSize: 24, fontWeight: 'bold', color: WiproColors.primary },
+  payNowButton: { backgroundColor: WiproColors.primary, padding: 16, borderRadius: WiproBorderRadius.full, alignItems: 'center', marginTop: 16 },
+  payNowText: { color: WiproColors.white, fontSize: 16, fontWeight: 'bold' },
   cancelButton: { padding: 12, alignItems: 'center', marginTop: 8 },
-  cancelText: { color: '#6B7280', fontSize: 16 },
+  cancelText: { color: WiproColors.gray[500], fontSize: 16 },
   // Processing styles
-  processingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#f5f5f5' },
-  processingText: { fontSize: 20, fontWeight: '600', marginTop: 24, color: '#374151' },
-  processingSubtext: { fontSize: 14, color: '#6B7280', marginTop: 8 },
+  processingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: WiproColors.background },
+  processingText: { fontSize: 20, fontWeight: '600', marginTop: 24, color: WiproColors.black },
+  processingSubtext: { fontSize: 14, color: WiproColors.gray[500], marginTop: 8 },
   // Success styles
-  successContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#f5f5f5', padding: 24 },
+  successContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: WiproColors.background, padding: 24 },
   successIcon: { fontSize: 64, marginBottom: 16 },
-  successTitle: { fontSize: 24, fontWeight: 'bold', color: '#10B981', marginBottom: 8 },
-  successText: { fontSize: 16, color: '#6B7280', textAlign: 'center', marginBottom: 16 },
-  successOrderId: { fontSize: 14, color: '#374151', marginBottom: 8 },
-  successPayment: { fontSize: 14, color: '#6B7280', marginBottom: 24 },
-  viewOrdersButton: { backgroundColor: '#4F46E5', paddingVertical: 16, paddingHorizontal: 32, borderRadius: 12, marginBottom: 12 },
-  viewOrdersText: { color: '#fff', fontSize: 16, fontWeight: 'bold' },
+  successTitle: { fontSize: 24, fontWeight: 'bold', color: WiproColors.success, marginBottom: 8 },
+  successText: { fontSize: 16, color: WiproColors.gray[500], textAlign: 'center', marginBottom: 16 },
+  successOrderId: { fontSize: 14, color: WiproColors.black, marginBottom: 8 },
+  successPayment: { fontSize: 14, color: WiproColors.gray[500], marginBottom: 24 },
+  viewOrdersButton: { backgroundColor: WiproColors.primary, paddingVertical: 16, paddingHorizontal: 32, borderRadius: WiproBorderRadius.full, marginBottom: 12 },
+  viewOrdersText: { color: WiproColors.white, fontSize: 16, fontWeight: 'bold' },
   continueShoppingButton: { paddingVertical: 12, paddingHorizontal: 32 },
-  continueShoppingText: { color: '#4F46E5', fontSize: 16, fontWeight: '600' },
+  continueShoppingText: { color: WiproColors.primary, fontSize: 16, fontWeight: '600' },
 });
 
 export default CreateOrderScreen;

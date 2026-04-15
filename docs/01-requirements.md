@@ -1,8 +1,33 @@
 # Order Management System - Requirements Specification
 
+## Document Information
+
+| Item | Details |
+|------|---------|
+| **Project** | Order Management System (OMS) |
+| **Version** | 2.0 |
+| **Last Updated** | April 2026 |
+| **Source** | [Confluence - Secure SDLC Pipeline](https://wipro-team-ky3gtu9s.atlassian.net/wiki/spaces/~7120207ab844a562c843b5880e9c9633e26746/pages/917505/Secure+SDLC+Pipeline) |
+
+---
+
 ## 1. Project Overview
 
-The Order Management System (OMS) is a microservices-based e-commerce platform that handles the complete order lifecycle from product browsing to delivery tracking. Built with Java Spring Boot backend and React Native Web frontend.
+The Order Management System (OMS) is a microservices-based e-commerce platform that handles the complete order lifecycle from product browsing to delivery tracking. Built with Java Spring Boot backend and React Native Web frontend, integrated with **Factory.AI** for autonomous development and **Lineaje SBOM360** for software supply chain security.
+
+### 1.1 Secure SDLC Pipeline Integration
+
+| Stage | Description | Key Tools |
+|-------|-------------|-----------|
+| PLAN | Requirements & Design | Jira, Linear, Slack + Factory.AI Droids |
+| CODE | Development | Factory.AI (Code Gen, Refactor, Test Gen) |
+| BUILD | Continuous Integration | CI/CD + Lineaje SBOM Generation |
+| TEST | Quality Assurance | Automated Testing + Factory.AI |
+| SECURITY GATE | Compliance & Approval | Lineaje SBOM360 + BOMbots |
+| DEPLOY | Release | Kubernetes, Docker + Security Attestation |
+| MONITOR | Operations | APM + Lineaje Continuous Monitoring |
+
+---
 
 ## 2. Functional Requirements
 
@@ -72,6 +97,8 @@ The Order Management System (OMS) is a microservices-based e-commerce platform t
 | FR-NOT-002 | System shall send shipping update notifications | Low |
 | FR-NOT-003 | Notifications shall be logged for demo purposes | Low |
 
+---
+
 ## 3. Non-Functional Requirements
 
 ### 3.1 Performance (NFR-PERF)
@@ -91,8 +118,43 @@ The Order Management System (OMS) is a microservices-based e-commerce platform t
 | NFR-SEC-003 | Service-to-service calls shall use internal JWT validation | Required |
 | NFR-SEC-004 | Input validation on all endpoints | Required |
 | NFR-SEC-005 | No sensitive data in logs | Required |
+| NFR-SEC-006 | SBOM generation for all builds | Required |
+| NFR-SEC-007 | Vulnerability scanning via Lineaje | Required |
 
-### 3.3 Reliability (NFR-REL)
+### 3.3 Security Controls by Pipeline Stage
+
+| Stage | Security Control | Tool | Automation Level |
+|-------|-----------------|------|------------------|
+| PLAN | Threat Modeling | Lineaje | Manual + AI-assisted |
+| PLAN | Third-party Risk | Lineaje | Automated |
+| CODE | SAST | Lineaje | Automated |
+| CODE | Secrets Detection | Lineaje | Automated |
+| CODE | Code Review | Factory.AI | Automated |
+| BUILD | SBOM Generation | Lineaje | Automated |
+| BUILD | Dependency Scan | Lineaje | Automated |
+| BUILD | Container Scan | Lineaje | Automated |
+| BUILD | License Check | Lineaje | Automated |
+| TEST | DAST | Lineaje | Automated |
+| TEST | API Security | Lineaje | Automated |
+| GATE | CVE Validation | Lineaje | Automated |
+| GATE | Policy Enforcement | Lineaje | Automated |
+| GATE | Auto-Remediation | Lineaje BOMbots | Automated |
+| DEPLOY | Runtime Security | Lineaje | Automated |
+| MONITOR | CVE Monitoring | Lineaje | Continuous |
+| MONITOR | Incident Response | Factory.AI | Automated |
+
+### 3.4 Compliance Mapping
+
+| Regulation | Requirement | How Addressed |
+|------------|-------------|---------------|
+| NIST SP 800-218 | Secure SDLC | Full pipeline coverage |
+| EO 14028 | SBOM requirement | Lineaje SBOM generation |
+| FedRAMP | Security controls | Automated security gates |
+| SOC 2 | Change management | Audit trail, approvals |
+| PCI DSS | Code review | Factory.AI automated review |
+| HIPAA | Access controls | Role-based pipeline access |
+
+### 3.5 Reliability (NFR-REL)
 
 | ID | Requirement | Target |
 |----|-------------|--------|
@@ -100,7 +162,7 @@ The Order Management System (OMS) is a microservices-based e-commerce platform t
 | NFR-REL-002 | Graceful error handling | Required |
 | NFR-REL-003 | Structured logging (JSON format) | Required |
 
-### 3.4 Maintainability (NFR-MAIN)
+### 3.6 Maintainability (NFR-MAIN)
 
 | ID | Requirement | Target |
 |----|-------------|--------|
@@ -109,7 +171,7 @@ The Order Management System (OMS) is a microservices-based e-commerce platform t
 | NFR-MAIN-003 | Code follows standard conventions | Required |
 | NFR-MAIN-004 | API documentation (OpenAPI) | Required |
 
-### 3.5 Deployment (NFR-DEP)
+### 3.7 Deployment (NFR-DEP)
 
 | ID | Requirement | Target |
 |----|-------------|--------|
@@ -118,6 +180,10 @@ The Order Management System (OMS) is a microservices-based e-commerce platform t
 | NFR-DEP-003 | Support embedded Tomcat (dev mode) | Required |
 | NFR-DEP-004 | Support external Tomcat (WAR deployment) | Required |
 | NFR-DEP-005 | Environment-based configuration | Required |
+| NFR-DEP-006 | Azure Ubuntu VM deployment | Required |
+| NFR-DEP-007 | Kubernetes-ready manifests | Optional |
+
+---
 
 ## 4. System Constraints
 
@@ -128,6 +194,8 @@ The Order Management System (OMS) is a microservices-based e-commerce platform t
 - **Database**: PostgreSQL (production), H2 (development/demo)
 - **Runtime**: Apache Tomcat (embedded or external)
 - **Container**: Docker, Docker Compose
+- **CI/CD**: Azure DevOps
+- **Security**: Lineaje SBOM360
 
 ### 4.2 Business Constraints
 
@@ -136,15 +204,48 @@ The Order Management System (OMS) is a microservices-based e-commerce platform t
 - No real shipping integration (mock only)
 - Single-region deployment
 
-## 5. Assumptions
+---
+
+## 5. Factory.AI Platform Capabilities
+
+### 5.1 Autonomous Development Features
+
+| Capability | Description |
+|------------|-------------|
+| Autonomous code generation | From requirements to working code |
+| Multi-file refactoring | Across entire codebase |
+| Automated unit test generation | JUnit 5 with Mockito |
+| PR creation | With detailed descriptions |
+| Code review | With actionable feedback |
+| Incident response | Via Slack integration |
+| Self-healing CI/CD pipelines | Automatic fix generation |
+
+### 5.2 Lineaje Security Capabilities
+
+| Capability | Description |
+|------------|-------------|
+| Deep SBOM generation | CycloneDX/SPDX formats |
+| Vulnerability detection | CVE scanning |
+| Agentic auto-remediation | BOMbots |
+| Self-healing containers | Automatic patching |
+| License compliance | Validation |
+| Federal compliance | NIST, EO 14028, FedRAMP |
+
+---
+
+## 6. Assumptions
 
 1. Users have modern web browsers (Chrome, Firefox, Safari, Edge)
 2. Docker is available for local development
 3. Java 17+ JDK is installed for non-Docker development
 4. Network connectivity between services in same Docker network
 5. Demo data will be seeded on startup
+6. Azure DevOps organization is available for CI/CD
+7. Lineaje API credentials are configured
 
-## 6. Dependencies
+---
+
+## 7. Dependencies
 
 | Dependency | Purpose | Version |
 |------------|---------|---------|
@@ -157,8 +258,47 @@ The Order Management System (OMS) is a microservices-based e-commerce platform t
 | JWT (jjwt) | Token handling | 0.12.x |
 | Expo | React Native Web build | 50.x |
 | React Native Web | Web rendering | 0.19.x |
+| CycloneDX | SBOM generation | 2.7.x |
+| Lineaje SDK | Security scanning | Latest |
 
-## 7. Glossary
+---
+
+## 8. Metrics & KPIs
+
+### 8.1 Security Metrics
+
+| Metric | Target | Measurement |
+|--------|--------|-------------|
+| Mean Time to Detect (MTTD) | < 1 hour | Time from CVE publish to detection |
+| Mean Time to Remediate (MTTR) | < 24 hours | Time from detection to fix deployed |
+| Critical CVE Escape Rate | 0% | Critical CVEs reaching production |
+| SBOM Coverage | 100% | % of deployments with complete SBOM |
+| Security Gate Pass Rate | 95% | % of builds passing security gate |
+| Auto-Remediation Rate | 80% | % of vulnerabilities auto-fixed by BOMbots |
+
+### 8.2 Development Metrics
+
+| Metric | Target | Measurement |
+|--------|--------|-------------|
+| Developer Productivity | +40% | Code output per developer |
+| PR Review Time | < 2 hours | Time from PR to review complete |
+| Build Success Rate | 95% | % of builds succeeding |
+| Test Coverage | 80% | Code coverage percentage |
+| Deployment Frequency | Daily | Deployments per day |
+| Lead Time | < 1 week | Commit to production time |
+
+### 8.3 Cost Metrics
+
+| Metric | Target | Measurement |
+|--------|--------|-------------|
+| Maintenance Cost Reduction | 40% | YoY maintenance spend |
+| Tool Consolidation | 5 → 2 | Number of SDLC tools |
+| Incident Cost Reduction | 50% | Cost per production incident |
+| Compliance Audit Time | -70% | Time spent on compliance audits |
+
+---
+
+## 9. Glossary
 
 | Term | Definition |
 |------|------------|
@@ -167,3 +307,18 @@ The Order Management System (OMS) is a microservices-based e-commerce platform t
 | API Gateway | Entry point for all client requests |
 | Microservice | Independent deployable service unit |
 | WAR | Web Application Archive (Java deployment format) |
+| SBOM | Software Bill of Materials - inventory of all software components |
+| CVE | Common Vulnerabilities and Exposures |
+| BOMbot | Lineaje's agentic AI for automated vulnerability remediation |
+| Droid | Factory.AI's autonomous AI agent for development tasks |
+| SAST | Static Application Security Testing |
+| DAST | Dynamic Application Security Testing |
+| SCA | Software Composition Analysis |
+| MTTR | Mean Time to Remediate |
+| MTTD | Mean Time to Detect |
+
+---
+
+**Document Version:** 2.0  
+**Source:** Confluence - Secure SDLC Pipeline  
+**Author:** Factory.AI + Lineaje Integration Team

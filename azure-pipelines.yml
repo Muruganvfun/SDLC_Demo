@@ -1,0 +1,251 @@
+# ============================================
+# Order Management System - Azure DevOps CI/CD Pipeline
+# Project: WINGS-POC
+# Repository: SDLC-POC
+# Organization: HOLMES-APPS
+# ============================================
+# PIPELINES:
+#   - This file: Main CI (Build & Test)
+#   - .azure/pipelines/cd-pipeline.yml: Docker & Deploy
+#   - .azure/pipelines/lineaje-security-pipeline.yml: Security scanning (Lineaje)
+#
+# LINEAJE INTEGRATION:
+#   Set these variables in Azure DevOps Library:
+#   - LINEAJE_API_KEY (secret): Your Lineaje API key
+#   - LINEAJE_ORG_ID: Your Lineaje organization ID
+#
+# NOTE: Docker & Deploy stages are in separate file (.azure/pipelines/cd-pipeline.yml)
+# Enable them after configuring Azure Service Connection
+# ============================================
+
+trigger:
+  branches:
+    include:
+      - main
+      - develop
+      - feature/*
+      - release/*
+      - hotfix/*
+  paths:
+    exclude:
+      - docs/*
+      - '*.md'
+
+pr:
+  branches:
+    include:
+      - main
+      - develop
+
+variables:
+  JAVA_VERSION: '17'
+  NODE_VERSION: '18'
+  MAVEN_CACHE_FOLDER: $(Pipeline.Workspace)/.m2/repository
+  MAVEN_OPTS: '-Dmaven.repo.local=$(MAVEN_CACHE_FOLDER)'
+
+stages:
+# ==================== BUILD STAGE ====================
+- stage: Build
+  displayName: 'Build & Test'
+  jobs:
+  # ---------- Backend Build & Test ----------
+  - job: BackendBuild
+    displayName: 'Backend Build & Test'
+    pool:
+      name: 'CUE-Pool'
+    
+    services:
+      postgres:
+        image: postgres:15-alpine
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: testdb
+
+    steps:
+    - task: Cache@2
+      displayName: 'Cache Maven packages'
+      inputs:
+        key: 'maven | "$(Agent.OS)" | backend/pom.xml'
+        restoreKeys: |
+          maven | "$(Agent.OS)"
+        path: $(MAVEN_CACHE_FOLDER)
+
+    - task: JavaToolInstaller@0
+      displayName: 'Install JDK $(JAVA_VERSION)'
+      inputs:
+        versionSpec: '$(JAVA_VERSION)'
+        jdkArchitectureOption: 'x64'
+        jdkSourceOption: 'PreInstalled'
+
+    - task: Maven@4
+      displayName: 'Maven Build'
+      inputs:
+        mavenPomFile: 'backend/pom.xml'
+        goals: 'clean compile'
+        options: '-DskipTests -B $(MAVEN_OPTS)'
+        publishJUnitResults: false
+
+    - task: Maven@4
+      displayName: 'Run Unit Tests'
+      inputs:
+        mavenPomFile: 'backend/pom.xml'
+        goals: 'test'
+        options: '-B $(MAVEN_OPTS)'
+        publishJUnitResults: true
+        testResultsFiles: '**/surefire-reports/TEST-*.xml'
+        testRunTitle: 'Backend Unit Tests'
+
+    - task: Maven@4
+      displayName: 'Run Integration Tests'
+      inputs:
+        mavenPomFile: 'backend/pom.xml'
+        goals: 'test'
+        options: '-Dtest=*IntegrationTest -DfailIfNoTests=false -B $(MAVEN_OPTS)'
+        publishJUnitResults: true
+        testResultsFiles: '**/surefire-reports/TEST-*IntegrationTest.xml'
+        testRunTitle: 'Backend Integration Tests'
+      continueOnError: true
+
+    - task: Maven@4
+      displayName: 'Generate Code Coverage'
+      inputs:
+        mavenPomFile: 'backend/pom.xml'
+        goals: 'jacoco:report'
+        options: '-B $(MAVEN_OPTS)'
+
+    - task: PublishCodeCoverageResults@2
+      displayName: 'Publish Code Coverage'
+      inputs:
+        summaryFileLocation: '$(System.DefaultWorkingDirectory)/backend/**/target/site/jacoco/jacoco.xml'
+        pathToSources: '$(System.DefaultWorkingDirectory)/backend'
+
+    - task: Maven@4
+      displayName: 'Package Application'
+      inputs:
+        mavenPomFile: 'backend/pom.xml'
+        goals: 'package'
+        options: '-DskipTests -B $(MAVEN_OPTS)'
+
+    - task: CopyFiles@2
+      displayName: 'Copy WAR/JAR files'
+      inputs:
+        SourceFolder: '$(System.DefaultWorkingDirectory)/backend'
+        Contents: |
+          **/target/*.war
+          **/target/*.jar
+          !**/target/original-*.jar
+        TargetFolder: '$(Build.ArtifactStagingDirectory)/backend'
+        flattenFolders: false
+
+    - task: PublishBuildArtifacts@1
+      displayName: 'Publish Backend Artifacts'
+      inputs:
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)/backend'
+        ArtifactName: 'backend-artifacts'
+        publishLocation: 'Container'
+
+  # ---------- Frontend Build & Test ----------
+  - job: FrontendBuild
+    displayName: 'Frontend Build & Test'
+    pool:
+      name: 'CUE-Pool'
+
+    steps:
+    - task: NodeTool@0
+      displayName: 'Install Node.js $(NODE_VERSION)'
+      inputs:
+        versionSpec: '$(NODE_VERSION)'
+
+    - task: Cache@2
+      displayName: 'Cache npm packages'
+      inputs:
+        key: 'npm | "$(Agent.OS)" | frontend/package-lock.json'
+        restoreKeys: |
+          npm | "$(Agent.OS)"
+        path: '$(System.DefaultWorkingDirectory)/frontend/node_modules'
+
+    - script: |
+        cd frontend
+        npm ci
+      displayName: 'Install Dependencies'
+
+    - script: |
+        cd frontend
+        npm run lint || true
+      displayName: 'Run Linting'
+      continueOnError: true
+
+    - script: |
+        cd frontend
+        npm run test:ci
+      displayName: 'Run Unit Tests'
+      continueOnError: true
+
+    - task: PublishTestResults@2
+      displayName: 'Publish Test Results'
+      inputs:
+        testResultsFormat: 'JUnit'
+        testResultsFiles: 'frontend/junit.xml'
+        testRunTitle: 'Frontend Unit Tests'
+      condition: always()
+
+    - task: PublishCodeCoverageResults@2
+      displayName: 'Publish Coverage'
+      inputs:
+        summaryFileLocation: '$(System.DefaultWorkingDirectory)/frontend/coverage/lcov.info'
+        pathToSources: '$(System.DefaultWorkingDirectory)/frontend/src'
+      condition: always()
+
+    - script: |
+        cd frontend
+        npm run build:web
+      displayName: 'Build Frontend'
+
+    - task: CopyFiles@2
+      displayName: 'Copy Build Output'
+      inputs:
+        SourceFolder: '$(System.DefaultWorkingDirectory)/frontend/dist'
+        Contents: '**'
+        TargetFolder: '$(Build.ArtifactStagingDirectory)/frontend'
+
+    - task: PublishBuildArtifacts@1
+      displayName: 'Publish Frontend Artifacts'
+      inputs:
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)/frontend'
+        ArtifactName: 'frontend-artifacts'
+        publishLocation: 'Container'
+
+# ==================== CODE QUALITY STAGE ====================
+- stage: CodeQuality
+  displayName: 'Code Quality & Security'
+  dependsOn: Build
+  condition: succeeded()
+  jobs:
+  - job: SecurityScan
+    displayName: 'Security Scanning (OWASP)'
+    pool:
+      name: 'CUE-Pool'
+    steps:
+    - task: JavaToolInstaller@0
+      inputs:
+        versionSpec: '17'
+        jdkArchitectureOption: 'x64'
+        jdkSourceOption: 'PreInstalled'
+
+    - task: Maven@4
+      displayName: 'OWASP Dependency Check'
+      inputs:
+        mavenPomFile: 'backend/pom.xml'
+        goals: 'org.owasp:dependency-check-maven:check'
+        options: '-DfailBuildOnCVSS=9 -B'
+      continueOnError: true
+
+    - task: PublishBuildArtifacts@1
+      displayName: 'Publish Security Report'
+      inputs:
+        PathtoPublish: '$(System.DefaultWorkingDirectory)/backend'
+        ArtifactName: 'security-reports'
+      condition: always()

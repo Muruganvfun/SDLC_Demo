@@ -1,0 +1,19 @@
+{
+  "enabledPlugins": {
+    "core@factory-plugins": true
+  },
+  "customDroids": {
+    "lineaje-remediation": {
+      "path": ".factory/droids/lineaje-remediation.yaml",
+      "description": "Lineaje SBOM360 vulnerability remediation assistant"
+    }
+  },
+  "securityIntegrations": {
+    "lineaje": {
+      "enabled": true,
+      "products": ["SCA360", "SBOM360", "SBOM360-Hub"],
+      "apiEndpoint": "https://api.lineaje.com/v1",
+      "reportsDirectory": ".lineaje/reports"
+    }
+  }
+}

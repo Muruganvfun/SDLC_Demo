@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FactoryAI - CUE Platform Differentiator</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0a12;
+            min-height: 100vh;
+            padding: 10px;
+            color: #fff;
+        }
+        .slide {
+            max-width: 1600px;
+            margin: 0 auto 30px;
+            background: linear-gradient(145deg, #1e2a4a 0%, #0f1629 100%);
+            border-radius: 12px;
+            padding: 25px 30px;
+            box-shadow: 0 15px 50px rgba(0,0,0,0.5);
+            page-break-after: always;
+        }
+        .slide-number {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            background: rgba(255,255,255,0.1);
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.7rem;
+            color: #8892b0;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 18px;
+            border-bottom: 2px solid #67b26f;
+            padding-bottom: 12px;
+            position: relative;
+        }
+        .header h1 {
+            font-size: 1.6rem;
+            background: linear-gradient(90deg, #67b26f, #4a90d9);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 4px;
+        }
+        .header .subtitle {
+            color: #8892b0;
+            font-size: 0.85rem;
+        }
+        .deck-title {
+            text-align: center;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .deck-title h1 {
+            font-size: 2.2rem;
+            background: linear-gradient(90deg, #67b26f, #4a90d9);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .deck-title p { color: #8892b0; margin-top: 5px; }
+        .deck-title .tagline {
+            font-size: 1rem;
+            color: #67b26f;
+            margin-top: 8px;
+            font-weight: 600;
+        }
+        
+        /* Section Styles */
+        .section-title {
+            background: linear-gradient(90deg, #67b26f, #4ca2cd);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .section-title.alternatives { background: linear-gradient(90deg, #9b59b6, #8e44ad); }
+        .section-title.comparison { background: linear-gradient(90deg, #e74c3c, #c0392b); }
+        .section-title.when-others { background: linear-gradient(90deg, #f39c12, #d68910); }
+        
+        /* Cards Grid */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+        .cards-grid.two-col { grid-template-columns: repeat(2, 1fr); }
+        .cards-grid.four-col { grid-template-columns: repeat(4, 1fr); }
+        .card {
+            background: rgba(255,255,255,0.03);
+            border-radius: 8px;
+            padding: 14px;
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+        .card h4 {
+            font-size: 0.82rem;
+            margin-bottom: 10px;
+            color: #67b26f;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .card.purple h4 { color: #9b59b6; }
+        .card.blue h4 { color: #4a90d9; }
+        .card.orange h4 { color: #f39c12; }
+        .card ul {
+            list-style: none;
+            font-size: 0.7rem;
+            color: #b8c5d6;
+        }
+        .card ul li {
+            padding: 4px 0;
+            display: flex;
+            align-items: flex-start;
+            gap: 6px;
+        }
+        .card ul li::before {
+            content: ">";
+            color: #67b26f;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+        .card.purple ul li::before { color: #9b59b6; }
+        .card.blue ul li::before { color: #4a90d9; }
+        .card.orange ul li::before { color: #f39c12; }
+        
+        /* Comparison Grid */
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: 170px repeat(6, 1fr);
+            gap: 2px;
+            margin-bottom: 15px;
+            font-size: 0.68rem;
+        }
+        .grid-header {
+            background: linear-gradient(135deg, #4a90d9 0%, #357abd 100%);
+            padding: 8px 5px;
+            font-weight: bold;
+            text-align: center;
+        }
+        .grid-header.factory { background: linear-gradient(135deg, #67b26f 0%, #4ca2cd 100%); }
+        .grid-header.copilot { background: linear-gradient(135deg, #5dade2 0%, #3498db 100%); }
+        .grid-header.claude { background: linear-gradient(135deg, #d4a574 0%, #c08552 100%); }
+        .grid-header.cursor { background: linear-gradient(135deg, #af7ac5 0%, #9b59b6 100%); }
+        .grid-header.devin { background: linear-gradient(135deg, #45b7d1 0%, #2980b9 100%); }
+        .grid-header.opensource { background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%); }
+        .grid-cell {
+            background: rgba(255,255,255,0.04);
+            padding: 7px 5px;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .grid-cell.feature-name {
+            background: rgba(103,178,111,0.12);
+            font-weight: 600;
+            text-align: left;
+            justify-content: flex-start;
+            padding-left: 8px;
+        }
+        .check { color: #67b26f; font-weight: bold; }
+        .partial { color: #f0ad4e; font-size: 0.62rem; }
+        .none { color: #666; }
+        .superior { color: #67b26f; font-weight: bold; }
+        
+        /* Value Box */
+        .value-box {
+            background: linear-gradient(135deg, rgba(103,178,111,0.1) 0%, rgba(74,144,217,0.1) 100%);
+            border: 1px solid rgba(103,178,111,0.25);
+            border-radius: 8px;
+            padding: 14px 18px;
+            margin-top: 15px;
+        }
+        .value-box.purple {
+            background: linear-gradient(135deg, rgba(155,89,182,0.1) 0%, rgba(142,68,173,0.1) 100%);
+            border-color: rgba(155,89,182,0.25);
+        }
+        .value-box.orange {
+            background: linear-gradient(135deg, rgba(243,156,18,0.1) 0%, rgba(230,126,34,0.1) 100%);
+            border-color: rgba(243,156,18,0.25);
+        }
+        .value-box h4 {
+            font-size: 0.88rem;
+            margin-bottom: 8px;
+            color: #67b26f;
+        }
+        .value-box.purple h4 { color: #9b59b6; }
+        .value-box.orange h4 { color: #f39c12; }
+        .value-box p {
+            font-size: 0.72rem;
+            color: #b8c5d6;
+            line-height: 1.5;
+        }
+        
+        /* Q&A Section */
+        .qa-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-top: 15px;
+        }
+        .qa-box {
+            background: rgba(255,255,255,0.03);
+            border-radius: 6px;
+            padding: 12px;
+            border-left: 3px solid #67b26f;
+        }
+        .qa-box .question {
+            font-size: 0.75rem;
+            color: #67b26f;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .qa-box .answer {
+            font-size: 0.7rem;
+            color: #b8c5d6;
+            line-height: 1.45;
+        }
+        
+        /* USP Pills */
+        .usp-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+        .usp-pill {
+            background: rgba(103,178,111,0.15);
+            border: 1px solid rgba(103,178,111,0.3);
+            border-radius: 20px;
+            padding: 6px 14px;
+            font-size: 0.7rem;
+            color: #67b26f;
+            font-weight: 600;
+        }
+        
+        /* Legend */
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 18px;
+            margin: 10px 0;
+            font-size: 0.62rem;
+            color: #8892b0;
+        }
+        .legend span { display: flex; align-items: center; gap: 5px; }
+        .legend .dot { width: 10px; height: 10px; border-radius: 3px; }
+        .legend .dot.assistant { background: #3498db; }
+        .legend .dot.agentic { background: #9b59b6; }
+        .legend .dot.opensource { background: #e74c3c; }
+        
+        /* Highlight Box */
+        .highlight-box {
+            background: linear-gradient(135deg, rgba(103,178,111,0.2) 0%, rgba(74,144,217,0.2) 100%);
+            border: 2px solid rgba(103,178,111,0.4);
+            border-radius: 10px;
+            padding: 15px 20px;
+            margin: 15px 0;
+            text-align: center;
+        }
+        .highlight-box h3 {
+            font-size: 1rem;
+            color: #67b26f;
+            margin-bottom: 8px;
+        }
+        .highlight-box p {
+            font-size: 0.78rem;
+            color: #b8c5d6;
+        }
+        
+        /* Table */
+        .info-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.68rem;
+            margin-top: 12px;
+        }
+        .info-table th {
+            background: rgba(103,178,111,0.2);
+            padding: 8px;
+            text-align: left;
+            color: #67b26f;
+        }
+        .info-table td {
+            padding: 7px 8px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            color: #b8c5d6;
+        }
+        .info-table tr:hover td { background: rgba(255,255,255,0.02); }
+        
+        @media print {
+            .slide { page-break-after: always; }
+            body { background: white; }
+        }
+    </style>
+</head>
+<body>
+    <div class="deck-title">
+        <h1>FactoryAI</h1>
+        <p class="tagline">Autonomous AI Droids for Enterprise Software Development</p>
+        <p>CUE Platform Differentiator | March 2026</p>
+    </div>
+
+    <!-- ==================== SLIDE 1: WHY FACTORYAI ==================== -->
+    <div class="slide" style="position: relative;">
+        <span class="slide-number">Slide 1 of 4</span>
+        <div class="header">
+            <h1>Why FactoryAI - The Differentiated Value</h1>
+            <div class="subtitle">Unique Edge That Sets FactoryAI Apart in the AI-Powered Development Landscape</div>
+        </div>
+
+        <div class="usp-container">
+            <span class="usp-pill">Autonomous Task Completion</span>
+            <span class="usp-pill">Multi-Surface Platform</span>
+            <span class="usp-pill">Parallelization at Scale</span>
+            <span class="usp-pill">Model Agnostic</span>
+            <span class="usp-pill">CI/CD Native Integration</span>
+            <span class="usp-pill">#1 Terminal-Bench</span>
+            <span class="usp-pill">Enterprise Proven (EY 5000+)</span>
+        </div>
+
+        <div class="section-title">Core Differentiators - What Makes FactoryAI Unique</div>
+        
+        <div class="cards-grid">
+            <div class="card">
+                <h4>Autonomous, Not Assistive</h4>
+                <ul>
+                    <li><strong>Complete Tasks End-to-End:</strong> Droids execute entire development tasks autonomously - not just suggestions</li>
+                    <li><strong>Multi-File Refactoring:</strong> Handle complex cross-file changes, dependency updates, and test modifications</li>
+                    <li><strong>Self-Correcting:</strong> Agents debug, iterate, and fix their own code until tests pass</li>
+                    <li><strong>PR-Ready Output:</strong> Creates complete, reviewable pull requests with context</li>
+                </ul>
+            </div>
+            <div class="card blue">
+                <h4>Multi-Surface Platform</h4>
+                <ul>
+                    <li><strong>IDE Extension:</strong> VS Code, JetBrains integration for in-editor workflows</li>
+                    <li><strong>CLI Tool:</strong> Terminal-based access for power users and automation</li>
+                    <li><strong>Slack Integration:</strong> Trigger Droids from Slack, get updates, respond to incidents</li>
+                    <li><strong>Jira/Linear Integration:</strong> Auto-assign, auto-update tickets as work progresses</li>
+                    <li><strong>CI/CD Native:</strong> Droids trigger from pipelines, auto-create PRs, self-heal builds</li>
+                </ul>
+            </div>
+            <div class="card purple">
+                <h4>Enterprise Scale & Flexibility</h4>
+                <ul>
+                    <li><strong>Parallelization:</strong> Run 1000s of Droids simultaneously for large-scale migrations</li>
+                    <li><strong>Model Agnostic:</strong> Use Claude, GPT, Gemini, or any LLM - no vendor lock-in</li>
+                    <li><strong>Enterprise Proven:</strong> EY deployment to 5,000+ engineers globally</li>
+                    <li><strong>SOC2 Compliant:</strong> Security certifications and enterprise SLAs</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="highlight-box">
+            <h3>"FactoryAI doesn't suggest code - it delivers completed work"</h3>
+            <p>From Jira ticket to merged PR, Droids handle the entire workflow while engineers focus on architecture and innovation</p>
+        </div>
+
+        <div class="section-title" style="background: linear-gradient(90deg, #4a90d9, #2980b9);">Key Value Propositions by Stakeholder</div>
+        
+        <div class="cards-grid four-col">
+            <div class="card">
+                <h4>For CTOs</h4>
+                <ul>
+                    <li>30-50% developer productivity gain</li>
+                    <li>Accelerate delivery timelines</li>
+                    <li>Reduce technical debt backlog</li>
+                    <li>Model flexibility - avoid vendor lock-in</li>
+                </ul>
+            </div>
+            <div class="card blue">
+                <h4>For Engineering Leaders</h4>
+                <ul>
+                    <li>Parallel migrations at scale</li>
+                    <li>Incident response in minutes</li>
+                    <li>Unified developer experience</li>
+                    <li>Measurable productivity metrics</li>
+                </ul>
+            </div>
+            <div class="card purple">
+                <h4>For DevOps/Platform</h4>
+                <ul>
+                    <li>Self-healing CI/CD pipelines</li>
+                    <li>Auto-fix build failures</li>
+                    <li>IaC updates and optimization</li>
+                    <li>Native pipeline integration</li>
+                </ul>
+            </div>
+            <div class="card orange">
+                <h4>For Developers</h4>
+                <ul>
+                    <li>Less time on routine tasks</li>
+                    <li>Automated code reviews</li>
+                    <li>Test generation and coverage</li>
+                    <li>Multi-file feature implementation</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="value-box">
+            <h4>The FactoryAI Difference</h4>
+            <p><strong>Only agentic platform</strong> with native enterprise integrations (Slack, Jira, CI/CD) AND parallelization at scale AND model flexibility. Competitors are either IDE-only (Cursor), model-locked (Copilot=OpenAI, Claude Code=Claude), or lack enterprise features (Cline/Aider). FactoryAI is the only platform built for enterprise teams who need autonomous development at scale.</p>
+        </div>
+    </div>
+
+    <!-- ==================== SLIDE 2: MARKET LANDSCAPE & ALTERNATIVES ==================== -->
+    <div class="slide" style="position: relative;">
+        <span class="slide-number">Slide 2 of 4</span>
+        <div class="header" style="border-bottom-color: #9b59b6;">
+            <h1 style="background: linear-gradient(90deg, #9b59b6, #8e44ad); -webkit-background-clip: text;">Market Landscape & Alternatives</h1>
+            <div class="subtitle">Overview of Comparable Solutions Available in the Ecosystem</div>
+        </div>
+
+        <div class="section-title alternatives">Category 1: GenAI Code Assistants (Suggestions-Based)</div>
+        
+        <div class="cards-grid">
+            <div class="card purple">
+                <h4>GitHub Copilot</h4>
+                <ul>
+                    <li><strong>Type:</strong> Code autocomplete & suggestions</li>
+                    <li><strong>Strengths:</strong> Market leader, GitHub integration, wide adoption</li>
+                    <li><strong>Model:</strong> OpenAI (locked)</li>
+                    <li><strong>Pricing:</strong> $10-39/user/month</li>
+                    <li><strong>Best For:</strong> Individual developer productivity, GitHub-native shops</li>
+                </ul>
+            </div>
+            <div class="card purple">
+                <h4>Amazon Q Developer</h4>
+                <ul>
+                    <li><strong>Type:</strong> Code assistant with AWS integration</li>
+                    <li><strong>Strengths:</strong> AWS ecosystem, enterprise-ready, code transformation</li>
+                    <li><strong>Model:</strong> AWS models (locked)</li>
+                    <li><strong>Pricing:</strong> $19/user/month</li>
+                    <li><strong>Best For:</strong> AWS-heavy organizations</li>
+                </ul>
+            </div>
+            <div class="card purple">
+                <h4>Tabnine</h4>
+                <ul>
+                    <li><strong>Type:</strong> Privacy-focused code completion</li>
+                    <li><strong>Strengths:</strong> On-premise options, privacy controls, multi-IDE</li>
+                    <li><strong>Model:</strong> Proprietary + custom</li>
+                    <li><strong>Pricing:</strong> Free tier + $12/user/month</li>
+                    <li><strong>Best For:</strong> Security-conscious organizations</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section-title alternatives">Category 2: Agentic AI Coding Tools (Autonomous)</div>
+        
+        <div class="cards-grid">
+            <div class="card purple">
+                <h4>Claude Code (Anthropic)</h4>
+                <ul>
+                    <li><strong>Type:</strong> Agentic terminal/IDE coding tool</li>
+                    <li><strong>Strengths:</strong> Strong autonomy, deep codebase understanding</li>
+                    <li><strong>Model:</strong> Claude only (locked)</li>
+                    <li><strong>Gap vs FactoryAI:</strong> No Slack/Jira/CI-CD integrations, no parallelization</li>
+                    <li><strong>Best For:</strong> Individual developers using Claude</li>
+                </ul>
+            </div>
+            <div class="card purple">
+                <h4>Cursor</h4>
+                <ul>
+                    <li><strong>Type:</strong> AI-native IDE with Composer</li>
+                    <li><strong>Strengths:</strong> Excellent UX, multi-model, inline editing</li>
+                    <li><strong>Model:</strong> Multi-model (flexible)</li>
+                    <li><strong>Gap vs FactoryAI:</strong> IDE-only, no enterprise integrations</li>
+                    <li><strong>Best For:</strong> Developers wanting AI-first IDE experience</li>
+                </ul>
+            </div>
+            <div class="card purple">
+                <h4>Devin (Cognition)</h4>
+                <ul>
+                    <li><strong>Type:</strong> Fully autonomous AI engineer</li>
+                    <li><strong>Strengths:</strong> High autonomy, complex task handling</li>
+                    <li><strong>Model:</strong> Proprietary (locked)</li>
+                    <li><strong>Gap vs FactoryAI:</strong> Expensive ($500+/mo), limited enterprise integrations</li>
+                    <li><strong>Best For:</strong> Complex autonomous tasks, well-funded teams</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section-title alternatives">Category 3: Open Source & Enterprise Alternatives</div>
+        
+        <div class="cards-grid four-col">
+            <div class="card purple">
+                <h4>Cline/Aider (OSS)</h4>
+                <ul>
+                    <li><strong>Type:</strong> Open source agentic tools</li>
+                    <li><strong>Strengths:</strong> Free, model-agnostic, customizable</li>
+                    <li><strong>Gap:</strong> No enterprise features, SLA, or integrations</li>
+                </ul>
+            </div>
+            <div class="card purple">
+                <h4>IBM watsonx Code Assistant</h4>
+                <ul>
+                    <li><strong>Type:</strong> Enterprise AI coding assistant</li>
+                    <li><strong>Strengths:</strong> IBM ecosystem, documentation focus</li>
+                    <li><strong>Gap:</strong> IBM Granite only, not fully autonomous</li>
+                </ul>
+            </div>
+            <div class="card purple">
+                <h4>OpenRewrite</h4>
+                <ul>
+                    <li><strong>Type:</strong> Recipe-based code refactoring</li>
+                    <li><strong>Strengths:</strong> Deterministic, Java/Kotlin focus</li>
+                    <li><strong>Gap:</strong> Recipe-based vs AI-driven, limited scope</li>
+                </ul>
+            </div>
+            <div class="card purple">
+                <h4>CAST / Wipro App Mod</h4>
+                <ul>
+                    <li><strong>Type:</strong> Code analysis & modernization</li>
+                    <li><strong>Strengths:</strong> Assessment, one-time migration</li>
+                    <li><strong>Gap:</strong> Analysis-only, not continuous automation</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="value-box purple">
+            <h4>Market Landscape Summary</h4>
+            <p>The AI coding market is fragmented into <strong>three tiers:</strong> (1) Code Assistants that provide suggestions (Copilot, Q, Tabnine), (2) Agentic Tools that can complete tasks but lack enterprise features (Claude Code, Cursor, Devin), and (3) Legacy Tools focused on analysis or one-time migration (CAST, OpenRewrite). <strong>FactoryAI uniquely bridges all gaps</strong> - providing autonomous task completion WITH native enterprise integrations AND parallelization at scale.</p>
+        </div>
+    </div>
+
+    <!-- ==================== SLIDE 3: COMPETITIVE COMPARISON ==================== -->
+    <div class="slide" style="position: relative;">
+        <span class="slide-number">Slide 3 of 4</span>
+        <div class="header" style="border-bottom-color: #e74c3c;">
+            <h1 style="background: linear-gradient(90deg, #e74c3c, #c0392b); -webkit-background-clip: text;">Competitive Comparison</h1>
+            <div class="subtitle">How FactoryAI Goes Beyond Key Competitors</div>
+        </div>
+
+        <div class="section-title comparison">FactoryAI vs All Major Competitors - Feature Matrix</div>
+        
+        <div class="comparison-grid" style="grid-template-columns: 160px repeat(7, 1fr);">
+            <div class="grid-header">Capability</div>
+            <div class="grid-header factory">FactoryAI</div>
+            <div class="grid-header copilot">Copilot</div>
+            <div class="grid-header claude">Claude Code</div>
+            <div class="grid-header cursor">Cursor</div>
+            <div class="grid-header devin">Devin</div>
+            <div class="grid-header opensource">Cline/Aider</div>
+            <div class="grid-header">IBM Bob</div>
+
+            <div class="grid-cell feature-name">Autonomous Task Completion</div>
+            <div class="grid-cell"><span class="superior">Yes</span></div>
+            <div class="grid-cell"><span class="partial">Suggestions</span></div>
+            <div class="grid-cell"><span class="check">Yes</span></div>
+            <div class="grid-cell"><span class="partial">Composer</span></div>
+            <div class="grid-cell"><span class="check">Yes</span></div>
+            <div class="grid-cell"><span class="partial">Limited</span></div>
+            <div class="grid-cell"><span class="partial">Assisted</span></div>
+
+            <div class="grid-cell feature-name">Multi-File Refactoring</div>
+            <div class="grid-cell"><span class="superior">Yes</span></div>
+            <div class="grid-cell"><span class="partial">Limited</span></div>
+            <div class="grid-cell"><span class="check">Yes</span></div>
+            <div class="grid-cell"><span class="check">Yes</span></div>
+            <div class="grid-cell"><span class="check">Yes</span></div>
+            <div class="grid-cell"><span class="check">Yes</span></div>
+            <div class="grid-cell"><span class="check">Yes</span></div>
+
+            <div class="grid-cell feature-name">Slack/Jira/Linear Integration</div>
+            <div class="grid-cell"><span class="superior">Native</span></div>
+            <div class="grid-cell"><span class="none">No</span></div>
+            <div class="grid-cell"><span class="none">No</span></div>
+            <div class="grid-cell"><span class="none">No</span></div>
+            <div class="grid-cell"><span class="partial">Slack only</span></div>
+            <div class="grid-cell"><span class="none">No</span></div>
+            <div class="grid-cell"><span class="none">No</span></div>
+
+            <div class="grid-cell feature-name">CI/CD Pipeline Integration</div>
+            <div class="grid-cell"><span class="superior">Native</span></div>
+            <div class="grid-cell"><span class="partial">GH Actions</span></div>
+            <div class="grid-cell"><span class="none">No</span></div>
+            <div class="grid-cell"><span class="none">No</span></div>
+            <div class="grid-cell"><span class="partial">Manual</span></div>
+            <div class="grid-cell"><span class="none">No</span></div>
+            <div class="grid-cell"><span class="partial">Limited</span></div>
+
+            <div class="grid-cell feature-name">Parallelization (1000s agents)</div>
+            <div class="grid-cell"><span class="superior">Yes</span></div>
+            <div class="grid-cell"><span class="none">No</span></div>
+            <div class="grid-cell"><span class="none">No</span></div>
+            <div class="grid-cell"><span class="none">No</span></div>
+            <div class="grid-cell"><span class="partial">Limited</span></div>
+            <div class="grid-cell"><span class="none">No</span></div>
+            <div class="grid-cell"><span class="none">No</span></div>
+
+            <div class="grid-cell feature-name">Model Agnostic (Any LLM)</div>
+            <div class="grid-cell"><span class="superior">Yes</span></div>
+            <div class="grid-cell"><span class="none">OpenAI</span></div>
+            <div class="grid-cell"><span class="none">Claude</span></div>
+            <div class="grid-cell"><span class="check">Yes</span></div>
+            <div class="grid-cell"><span class="none">Proprietary</span></div>
+            <div class="grid-cell"><span class="check">Yes</span></div>
+            <div class="grid-cell"><span class="none">Granite</span></div>
+
+            <div class="grid-cell feature-name">Incident Response via Slack</div>
+            <div class="grid-cell"><span class="superior">Yes</span></div>
+            <div class="grid-cell"><span class="none">No</span></div>
+            <div class="grid-cell"><span class="none">No</span></div>
+            <div class="grid-cell"><span class="none">No</span></div>
+            <div class="grid-cell"><span class="partial">Manual</span></div>
+            <div class="grid-cell"><span class="none">No</span></div>
+            <div class="grid-cell"><span class="none">No</span></div>
+
+            <div class="grid-cell feature-name">Enterprise SLA & SOC2</div>
+            <div class="grid-cell"><span class="superior">Yes</span></div>
+            <div class="grid-cell"><span class="check">Yes</span></div>
+            <div class="grid-cell"><span class="partial">Growing</span></div>
+            <div class="grid-cell"><span class="partial">Growing</span></div>
+            <div class="grid-cell"><span class="partial">Growing</span></div>
+            <div class="grid-cell"><span class="none">Community</span></div>
+            <div class="grid-cell"><span class="check">Yes</span></div>
+
+            <div class="grid-cell feature-name">Proven Enterprise Scale</div>
+            <div class="grid-cell"><span class="superior">EY 5000+</span></div>
+            <div class="grid-cell"><span class="check">Yes</span></div>
+            <div class="grid-cell"><span class="partial">Growing</span></div>
+            <div class="grid-cell"><span class="partial">Growing</span></div>
+            <div class="grid-cell"><span class="partial">Growing</span></div>
+            <div class="grid-cell"><span class="none">Individual</span></div>
+            <div class="grid-cell"><span class="check">IBM</span></div>
+        </div>
+
+        <div class="legend">
+            <span><span class="dot assistant"></span> Code Assistants</span>
+            <span><span class="dot agentic"></span> Agentic Tools</span>
+            <span><span class="dot opensource"></span> Open Source</span>
+        </div>
+
+        <div class="section-title comparison" style="margin-top: 15px;">Head-to-Head: Why FactoryAI Wins</div>
+        
+        <div class="qa-grid">
+            <div class="qa-box">
+                <div class="question">vs GitHub Copilot (Market Leader)</div>
+                <div class="answer">Copilot provides suggestions; <strong>FactoryAI completes entire tasks</strong>. Copilot is IDE-only; FactoryAI works in Slack, Jira, CI/CD. Copilot is OpenAI-locked; FactoryAI is model-agnostic. Copilot is per-user; FactoryAI parallelizes 1000s of agents.</div>
+            </div>
+            <div class="qa-box">
+                <div class="question">vs Claude Code (Closest Agentic Competitor)</div>
+                <div class="answer">Both are agentic, but <strong>FactoryAI has native Slack/Jira/CI-CD integrations</strong> that Claude Code lacks. FactoryAI is model-agnostic; Claude Code only uses Claude. FactoryAI is proven at scale (EY 5000+); Claude Code is growing.</div>
+            </div>
+            <div class="qa-box">
+                <div class="question">vs Cursor (Best AI IDE)</div>
+                <div class="answer">Cursor is an excellent AI IDE but <strong>IDE-only</strong>. FactoryAI works across IDE, CLI, Slack, Jira, and CI/CD. FactoryAI has enterprise integrations and parallelization that Cursor lacks. Cursor for individual devs; FactoryAI for enterprise teams.</div>
+            </div>
+            <div class="qa-box">
+                <div class="question">vs Devin (Autonomous Agent)</div>
+                <div class="answer">Both are autonomous, but <strong>FactoryAI has deeper enterprise integrations</strong> and proven scale. Devin is expensive ($500+/mo) with proprietary models. FactoryAI is model-agnostic with flexible pricing. FactoryAI has EY-scale proof points.</div>
+            </div>
+            <div class="qa-box">
+                <div class="question">vs Cline/Aider (Open Source)</div>
+                <div class="answer">OSS tools lack <strong>enterprise features</strong>: no SLA, no SOC2, community support only. FactoryAI has parallelization at scale, native Slack/Jira/CI integrations. OSS is free but high operational cost; FactoryAI has lower total cost of ownership.</div>
+            </div>
+            <div class="qa-box">
+                <div class="question">vs Wipro App Mod Studio</div>
+                <div class="answer">Different purposes: <strong>App Mod Studio modernizes applications</strong> (one-time migration); <strong>FactoryAI modernizes how engineering is done</strong> (continuous automation). Best Together: App Mod first, then FactoryAI for ongoing development.</div>
+            </div>
+        </div>
+
+        <div class="value-box" style="background: linear-gradient(135deg, rgba(231,76,60,0.1) 0%, rgba(192,57,43,0.1) 100%); border-color: rgba(231,76,60,0.25);">
+            <h4 style="color: #e74c3c;">Competitive Moat Summary</h4>
+            <p><strong>No single competitor matches FactoryAI's combination of:</strong> (1) True autonomous task completion, (2) Native enterprise integrations (Slack, Jira, CI/CD), (3) Parallelization at massive scale (1000s of agents), (4) Model flexibility (any LLM), and (5) Proven enterprise deployment (EY 5000+ engineers). Competitors either lack autonomy (Copilot), lack integrations (Claude Code, Cursor), lack scale (Devin), or lack enterprise features (OSS).</p>
+        </div>
+    </div>
+
+    <!-- ==================== SLIDE 4: WHEN ALTERNATIVES MAKE SENSE ==================== -->
+    <div class="slide" style="position: relative;">
+        <span class="slide-number">Slide 4 of 4</span>
+        <div class="header" style="border-bottom-color: #f39c12;">
+            <h1 style="background: linear-gradient(90deg, #f39c12, #d68910); -webkit-background-clip: text;">When Alternatives Make Sense</h1>
+            <div class="subtitle">Scenarios Where a Competing Solution May Be the Better Fit</div>
+        </div>
+
+        <div class="section-title when-others">Scenarios Where Competitors May Be Preferred</div>
+        
+        <div class="cards-grid two-col">
+            <div class="card orange">
+                <h4>Choose GitHub Copilot When...</h4>
+                <ul>
+                    <li><strong>All-in on GitHub:</strong> Organization uses GitHub for everything (repos, actions, projects) and wants tight integration</li>
+                    <li><strong>Autocomplete Focus:</strong> Primary need is inline code suggestions, not autonomous task completion</li>
+                    <li><strong>Budget Constrained:</strong> $10-19/user/month is the max budget and features are sufficient</li>
+                    <li><strong>Simple Use Cases:</strong> Individual developers doing routine coding tasks without complex workflows</li>
+                    <li><strong>Already Deployed:</strong> Organization has already rolled out Copilot and sees sufficient value</li>
+                </ul>
+            </div>
+            <div class="card orange">
+                <h4>Choose Claude Code When...</h4>
+                <ul>
+                    <li><strong>Claude Preference:</strong> Team strongly prefers Claude's reasoning and coding capabilities</li>
+                    <li><strong>Terminal/CLI Workflow:</strong> Developers work primarily in terminal and don't need Slack/Jira integrations</li>
+                    <li><strong>Individual Developers:</strong> Small team or solo developers without enterprise workflow needs</li>
+                    <li><strong>API-Based Pricing:</strong> Prefer usage-based pricing over subscription model</li>
+                    <li><strong>Anthropic Relationship:</strong> Existing Anthropic enterprise agreement</li>
+                </ul>
+            </div>
+            <div class="card orange">
+                <h4>Choose Cursor When...</h4>
+                <ul>
+                    <li><strong>IDE-Centric Workflow:</strong> Developers live in their IDE and don't need Slack/Jira/CI integrations</li>
+                    <li><strong>Best-in-Class UX:</strong> User experience and IDE quality is the top priority</li>
+                    <li><strong>Individual Productivity:</strong> Focus is on individual developer efficiency, not team workflows</li>
+                    <li><strong>Multi-Model Experimentation:</strong> Want to easily switch between models within IDE</li>
+                    <li><strong>Cost-Sensitive:</strong> $20/month per developer is the budget ceiling</li>
+                </ul>
+            </div>
+            <div class="card orange">
+                <h4>Choose Devin When...</h4>
+                <ul>
+                    <li><strong>Maximum Autonomy:</strong> Need the highest level of autonomous task completion regardless of cost</li>
+                    <li><strong>Complex Greenfield Tasks:</strong> Building new features/repos from scratch with minimal guidance</li>
+                    <li><strong>Budget Available:</strong> Can afford $500+/month per agent for premium capability</li>
+                    <li><strong>No Integration Requirements:</strong> Don't need native Slack/Jira/CI-CD workflow integrations</li>
+                    <li><strong>Early Adopter:</strong> Willing to work with a newer product for cutting-edge capability</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="cards-grid two-col" style="margin-top: 12px;">
+            <div class="card orange">
+                <h4>Choose Open Source (Cline/Aider) When...</h4>
+                <ul>
+                    <li><strong>Zero Budget:</strong> No budget for commercial AI coding tools</li>
+                    <li><strong>Maximum Customization:</strong> Need to modify source code and create custom workflows</li>
+                    <li><strong>No Enterprise Requirements:</strong> Don't need SLA, SOC2, or dedicated support</li>
+                    <li><strong>Technical Team:</strong> Have DevOps resources to deploy and maintain OSS tools</li>
+                    <li><strong>Model Experimentation:</strong> Want to run local models or test many different LLMs</li>
+                </ul>
+            </div>
+            <div class="card orange">
+                <h4>Choose Wipro App Mod Studio When...</h4>
+                <ul>
+                    <li><strong>Legacy Modernization:</strong> Primary need is one-time modernization of legacy apps (Struts to Spring, Java 8 to 17)</li>
+                    <li><strong>Services-Led Engagement:</strong> Prefer Wipro-led delivery with IP + services model</li>
+                    <li><strong>Existing Wipro Relationship:</strong> Already engaged with Wipro for application services</li>
+                    <li><strong>Assessment Focus:</strong> Need comprehensive portfolio analysis before modernization</li>
+                    <li><strong>Note:</strong> Best used together with FactoryAI - App Mod first, then FactoryAI for continuous development</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section-title when-others" style="margin-top: 15px;">When FactoryAI is the Clear Choice</div>
+        
+        <table class="info-table">
+            <tr>
+                <th style="width: 30%;">Requirement</th>
+                <th style="width: 35%;">Why FactoryAI</th>
+                <th style="width: 35%;">Competitor Gap</th>
+            </tr>
+            <tr>
+                <td><strong>Enterprise-scale migration</strong> (50+ repos)</td>
+                <td>Parallelization of 1000s of Droids simultaneously</td>
+                <td>All competitors are single-agent or limited parallelization</td>
+            </tr>
+            <tr>
+                <td><strong>Slack/Jira-integrated workflows</strong></td>
+                <td>Native integrations - Droids trigger from Slack, update Jira</td>
+                <td>Claude Code, Cursor, OSS have no integrations; Devin has limited Slack only</td>
+            </tr>
+            <tr>
+                <td><strong>CI/CD self-healing</strong></td>
+                <td>Droids trigger from pipeline failures, auto-fix, re-run</td>
+                <td>No competitor has native CI/CD pipeline integration</td>
+            </tr>
+            <tr>
+                <td><strong>Model flexibility required</strong></td>
+                <td>Use Claude, GPT, Gemini, or any LLM - switch anytime</td>
+                <td>Copilot=OpenAI, Claude Code=Claude, Devin=Proprietary, IBM Bob=Granite</td>
+            </tr>
+            <tr>
+                <td><strong>Incident response via Slack</strong></td>
+                <td>Non-developers can trigger code fixes from Slack channel</td>
+                <td>No competitor offers this - unique capability</td>
+            </tr>
+            <tr>
+                <td><strong>Proven enterprise deployment</strong></td>
+                <td>EY 5,000+ engineers deployed globally</td>
+                <td>Claude Code, Cursor, Devin still growing enterprise footprint</td>
+            </tr>
+        </table>
+
+        <div class="value-box orange">
+            <h4>Decision Framework Summary</h4>
+            <p>
+                <strong>Choose Copilot</strong> for basic autocomplete in GitHub-native shops |
+                <strong>Choose Claude Code</strong> for individual devs who love Claude and work in terminal |
+                <strong>Choose Cursor</strong> for best-in-class IDE experience without enterprise needs |
+                <strong>Choose Devin</strong> for maximum autonomy regardless of cost |
+                <strong>Choose OSS</strong> for zero-budget scenarios with technical teams |
+                <strong>Choose App Mod Studio</strong> for one-time legacy modernization projects |
+                <strong>Choose FactoryAI</strong> for enterprise teams needing autonomous development with Slack/Jira/CI-CD integration at scale
+            </p>
+        </div>
+
+        <div class="highlight-box" style="border-color: rgba(103,178,111,0.5);">
+            <h3>Bottom Line: FactoryAI is Built for Enterprise Teams</h3>
+            <p>If you need autonomous AI agents that integrate with your existing enterprise workflow (Slack, Jira, CI/CD), can scale to thousands of parallel executions, offer model flexibility, and are proven at scale - <strong>FactoryAI is the only choice</strong>. Competitors excel in narrower use cases but cannot match the full enterprise platform.</p>
+        </div>
+    </div>
+
+</body>
+</html>

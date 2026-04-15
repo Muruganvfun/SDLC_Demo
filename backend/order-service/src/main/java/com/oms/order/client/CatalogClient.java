@@ -1,12 +1,11 @@
 package com.oms.order.client;
 
+import com.oms.common.client.dto.ProductInfo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
-
-import java.math.BigDecimal;
 
 @Slf4j
 @Component
@@ -32,17 +31,7 @@ public class CatalogClient {
     }
 
     @lombok.Data
-    public static class ProductResponse {
+    private static class ProductResponse {
         private ProductInfo data;
-    }
-
-    @lombok.Data
-    public static class ProductInfo {
-        private String id;
-        private String name;
-        private String description;
-        private BigDecimal price;
-        private boolean active;
-        private Boolean inStock;
     }
 }

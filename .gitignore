@@ -129,6 +129,8 @@ secrets/
 credentials/
 .secrets
 *.secret
+*.local
+.lineaje/credentials.local
 
 # AWS
 .aws/

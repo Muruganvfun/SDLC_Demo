@@ -25,14 +25,15 @@ public class AuthService {
 
     @Transactional
     public UserResponse register(RegisterRequest request) {
-        log.info("Registering user with email: {}", request.getEmail());
+        String email = request.getEmail().toLowerCase();
+        log.info("Registering user with email: {}", email);
 
-        if (userRepository.existsByEmail(request.getEmail())) {
+        if (userRepository.existsByEmail(email)) {
             throw ApiException.conflict("Email already registered");
         }
 
         User user = User.builder()
-                .email(request.getEmail().toLowerCase())
+                .email(email)
                 .passwordHash(passwordEncoder.encode(request.getPassword()))
                 .name(request.getName())
                 .role(User.Role.CUSTOMER)

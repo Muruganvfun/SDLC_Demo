@@ -1,0 +1,22 @@
+[
+  {
+    "id": "deploy-sdlc",
+    "execute-command": "/data/CUE-POC/SDLC-POC/scripts/deploy.sh",
+    "command-working-directory": "/data/CUE-POC/SDLC-POC",
+    "response-message": "SDLC-POC deployment triggered!",
+    "trigger-rule": {
+      "and": [
+        {
+          "match": {
+            "type": "value",
+            "value": "sdlc-deploy-secret-2026",
+            "parameter": {
+              "source": "header",
+              "name": "X-Deploy-Token"
+            }
+          }
+        }
+      ]
+    }
+  }
+]

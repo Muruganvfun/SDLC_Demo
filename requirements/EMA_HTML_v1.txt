@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html>
+<head>
+  	<meta charset="utf-8">
+  	<meta name="viewport" content="initial-scale=1, width=device-width">
+  	
+  	<link rel="stylesheet"  href="./index.css" />
+  	<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Proxima Nova:wght@400;600&display=swap" />
+  	
+  	
+  	
+</head>
+<body>
+  	
+  	<div class="desktop">
+    		<div class="desktop2">
+      			<div class="desktop-inner">
+        				<div class="frame-parent">
+          					<div class="headline-parent">
+            						<div class="headline">
+              							<div class="what-would-you">What would you like to build?</div>
+            						</div>
+            						<div class="component-117">
+              							<div class="agent">
+                								<img class="fluentagents-48-regular-icon" alt="">
+                								
+                								<div class="agent-wrapper">
+                  									<div class="start-building-by">Agent</div>
+                								</div>
+              							</div>
+              							<div class="workflow">
+                								<img class="vector-icon" alt="">
+                								
+                								<div class="agent-wrapper">
+                  									<div class="start-building-by">Workflow</div>
+                								</div>
+              							</div>
+            						</div>
+            						<div class="search-bar">
+              							<div class="start-building-by">Start building by describing what your agent needs to do</div>
+              							<div class="famiconssettings-outline-parent">
+                								<div class="famiconssettings-outline">
+                  									<div class="setting">
+                    										<img class="vector-icon2" alt="">
+                    										
+                  									</div>
+                								</div>
+                								<div class="famiconssettings-outline2">
+                  									<div class="mic">
+                    										<img class="vector-icon3" alt="">
+                    										
+                  									</div>
+                  									<div class="send">
+                    										<img class="vector-icon4" alt="">
+                    										
+                  									</div>
+                								</div>
+              							</div>
+            						</div>
+          					</div>
+          					<div class="start-building">
+            						<div class="headline2">
+              							<div class="start-building-from">Start building from scratch</div>
+            						</div>
+            						<div class="cards">
+              							<div class="create-flow">
+                								<img class="create-flow-icon" alt="">
+                								
+                								<div class="create-workflow-text">
+                  									<div class="headline3">Create workflow</div>
+                  									<div class="powerful-autonomous-speed">Streamlined automation boosts productivity and ensures robust protection.</div>
+                								</div>
+              							</div>
+              							<div class="create-flow">
+                								<img class="create-flow-icon" alt="">
+                								
+                								<div class="create-workflow-text">
+                  									<div class="headline3">Create autonomous agent </div>
+                  									<div class="powerful-autonomous-speed">Intelligent automation accelerates efficiency and upholds superior safety </div>
+                								</div>
+              							</div>
+              							<div class="create-flow">
+                								<img class="create-flow-icon" alt="">
+                								
+                								<div class="create-workflow-text">
+                  									<div class="headline3">Computer-using agent</div>
+                  									<div class="powerful-autonomous-speed">Integrated automation optimizes workflows and guarantees first-rate security.</div>
+                								</div>
+              							</div>
+            						</div>
+          					</div>
+          					<div class="start-building">
+            						<div class="headline6">
+              							<div class="start-building-from">Learning Resources</div>
+              							<div class="see-all">See all</div>
+            						</div>
+            						<div class="learning-resources-parent">
+              							<div class="learning-resources3">
+                								<img class="create-flow-icon4" alt="">
+                								
+                								<div class="create-workflow-text4">
+                  									<div class="dynamic-automation-accelerates">Dynamic automation accelerates your processes while prioritizing ease</div>
+                								</div>
+              							</div>
+              							<div class="learning-resources3">
+                								<img class="create-flow-icon4" alt="">
+                								
+                								<div class="create-workflow-text4">
+                  									<div class="dynamic-automation-accelerates">Efficient automation enhances your workflows with a focus on simplicity</div>
+                								</div>
+              							</div>
+              							<div class="learning-resources3">
+                								<img class="create-flow-icon4" alt="">
+                								
+                								<div class="create-workflow-text4">
+                  									<div class="dynamic-automation-accelerates">Cutting-edge technology that seamlessly integrates with your workflow.</div>
+                								</div>
+              							</div>
+              							<div class="learning-resources3">
+                								<img class="create-flow-icon4" alt="">
+                								
+                								<div class="create-workflow-text4">
+                  									<div class="dynamic-automation-accelerates">Improved collaboration tools that elevate team efficiency.</div>
+                								</div>
+              							</div>
+              							<div class="learning-resources3">
+                								<img class="create-flow-icon4" alt="">
+                								
+                								<div class="create-workflow-text4">
+                  									<div class="dynamic-automation-accelerates">Comprehensive analytics solutions to monitor performance and enhance results.</div>
+                								</div>
+              							</div>
+              							<div class="learning-resources3">
+                								<img class="create-flow-icon4" alt="">
+                								
+                								<div class="create-workflow-text4">
+                  									<div class="dynamic-automation-accelerates">Intuitive interface crafted for an effortless user experience.</div>
+                								</div>
+              							</div>
+            						</div>
+          					</div>
+        				</div>
+      			</div>
+      			<div class="desktop3">
+        				<div class="home">
+          					<div class="active">
+            						<img class="home-icon" alt="">
+            						
+            						<div class="start-building-by">Home</div>
+          					</div>
+        				</div>
+        				<div class="flow">
+          					<div class="default">
+            						<img class="home-icon" alt="">
+            						
+            						<div class="start-building-by">Agent</div>
+          					</div>
+        				</div>
+        				<div class="flow">
+          					<div class="default">
+            						<img class="flow-icon" alt="">
+            						
+            						<div class="start-building-by">Flow</div>
+          					</div>
+        				</div>
+        				<div class="flow">
+          					<div class="default">
+            						<img class="flow-icon" alt="">
+            						
+            						<div class="start-building-by">Tools</div>
+          					</div>
+        				</div>
+        				<div class="flow">
+          					<div class="default">
+            						<img class="more-icon" alt="">
+            						
+            						<div class="start-building-by">More</div>
+          					</div>
+        				</div>
+      			</div>
+      			<div class="header-desktop">
+        				<div class="wipro-new-logo-4-parent">
+          					<img class="wipro-new-logo-4-icon" alt="">
+          					
+          					<div class="start-building-from">WINGS Studio</div>
+        				</div>
+        				<div class="setting-parent">
+          					<div class="start-building-from">Setting</div>
+          					<div class="start-building-from">FAQ</div>
+          					<div class="start-building-from">User</div>
+        				</div>
+      			</div>
+    		</div>
+  	</div>
+  	
+  	
+  	
+  	
+</body>
+</html>

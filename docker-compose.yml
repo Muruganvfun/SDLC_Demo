@@ -101,8 +101,8 @@ services:
   # Services
   auth-service:
     build:
-      context: ./backend/auth-service
-      dockerfile: Dockerfile
+      context: ./backend
+      dockerfile: auth-service/Dockerfile
     environment:
       SPRING_PROFILES_ACTIVE: docker
       JWT_SECRET: ${JWT_SECRET:-OMS_JWT_SECRET_KEY_MINIMUM_256_BITS_FOR_HS256_ALGORITHM_SECURITY}
@@ -120,8 +120,8 @@ services:
 
   catalog-service:
     build:
-      context: ./backend/catalog-service
-      dockerfile: Dockerfile
+      context: ./backend
+      dockerfile: catalog-service/Dockerfile
     environment:
       SPRING_PROFILES_ACTIVE: docker
     depends_on:
@@ -138,8 +138,8 @@ services:
 
   order-service:
     build:
-      context: ./backend/order-service
-      dockerfile: Dockerfile
+      context: ./backend
+      dockerfile: order-service/Dockerfile
     environment:
       SPRING_PROFILES_ACTIVE: docker
     depends_on:
@@ -160,8 +160,8 @@ services:
 
   inventory-service:
     build:
-      context: ./backend/inventory-service
-      dockerfile: Dockerfile
+      context: ./backend
+      dockerfile: inventory-service/Dockerfile
     environment:
       SPRING_PROFILES_ACTIVE: docker
     depends_on:
@@ -178,8 +178,8 @@ services:
 
   payment-service:
     build:
-      context: ./backend/payment-service
-      dockerfile: Dockerfile
+      context: ./backend
+      dockerfile: payment-service/Dockerfile
     environment:
       SPRING_PROFILES_ACTIVE: docker
     depends_on:
@@ -196,8 +196,8 @@ services:
 
   shipping-service:
     build:
-      context: ./backend/shipping-service
-      dockerfile: Dockerfile
+      context: ./backend
+      dockerfile: shipping-service/Dockerfile
     environment:
       SPRING_PROFILES_ACTIVE: docker
     depends_on:
@@ -214,8 +214,8 @@ services:
 
   notification-service:
     build:
-      context: ./backend/notification-service
-      dockerfile: Dockerfile
+      context: ./backend
+      dockerfile: notification-service/Dockerfile
     environment:
       SPRING_PROFILES_ACTIVE: docker
     networks:
@@ -229,8 +229,8 @@ services:
 
   api-gateway:
     build:
-      context: ./backend/api-gateway
-      dockerfile: Dockerfile
+      context: ./backend
+      dockerfile: api-gateway/Dockerfile
     ports:
       - "8080:8080"
     environment:
